@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoorPath - Your Guided Path to Islamic Knowledge</title>
+    <meta name="description" content="Beautiful, practical digital guides, planners, and ebooks crafted for new Muslims and curious minds. Start your Islamic journey with confidence.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ====== CSS CUSTOM PROPERTIES ====== */
+        :root {
+            --primary: #1B5E3B;
+            --primary-light: #27804F;
+            --primary-dark: #144A2E;
+            --secondary: #C7A034;
+            --secondary-light: #E8D5A0;
+            --secondary-dark: #A8862B;
+            --dark: #1A1A2E;
+            --medium: #4A4A5A;
+            --light-gray: #E5E5E5;
+            --cream: #FAF8F5;
+            --white: #FFFFFF;
+            --navy: #16213E;
+            --teal: #2E8B8B;
+            --rose: #C0392B;
+            --success: #27AE60;
+            --font-heading: 'Plus Jakarta Sans', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-arabic: 'Amiri', serif;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --max-width: 1200px;
+            --transition: 0.3s ease;
+        }
+
+        /* ====== RESET & BASE ====== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-body);
+            color: var(--dark);
+            background: var(--cream);
+            line-height: 1.6;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+        img { max-width: 100%; display: block; }
+        a { text-decoration: none; color: inherit; }
+        button { cursor: pointer; border: none; background: none; font-family: inherit; }
+        ul { list-style: none; }
+        h1, h2, h3, h4 { font-family: var(--font-heading); line-height: 1.2; }
+        h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; }
+        h2 { font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700; }
+        h3 { font-size: 1.25rem; font-weight: 700; }
+        .container { max-width: var(--max-width); margin: 0 auto; padding: 0 20px; }
+
+        /* ====== ANNOUNCEMENT BAR ====== */
+        .announcement {
+            background: var(--navy);
+            color: var(--white);
+            text-align: center;
+            padding: 10px 40px 10px 20px;
+            font-size: 0.875rem;
+            position: relative;
+            font-weight: 500;
+        }
+        .announcement span { color: var(--secondary); font-weight: 700; }
+        .announcement-close {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--white);
+            font-size: 1.25rem;
+            opacity: 0.7;
+            padding: 4px;
+        }
+        .announcement-close:hover { opacity: 1; }
+        .announcement.hidden { display: none; }
+
+        /* ====== NAVIGATION ====== */
+        .nav {
+            background: var(--white);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+        .nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .logo .crescent {
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+        .nav-links {
+            display: none;
+            gap: 32px;
+            align-items: center;
+        }
+        .nav-links a {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--medium);
+            transition: color var(--transition);
+        }
+        .nav-links a:hover { color: var(--primary); }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .cart-btn {
+            position: relative;
+            padding: 8px;
+            color: var(--dark);
+        }
+        .cart-btn svg { width: 24px; height: 24px; }
+        .cart-count {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--secondary);
+            color: var(--white);
+            font-size: 0.7rem;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cart-count.hidden { display: none; }
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 8px;
+        }
+        .hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--dark);
+            transition: var(--transition);
+            border-radius: 2px;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--white);
+            z-index: 200;
+            padding: 80px 30px 30px;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .mobile-menu.active { display: flex; }
+        .mobile-menu a {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        .mobile-menu-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            color: var(--dark);
+            padding: 8px;
+        }
+
+        /* ====== HERO ====== */
+        .hero {
+            position: relative;
+            padding: 60px 0 80px;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+            color: var(--white);
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0.07;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px),
+                repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px);
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(199,160,52,0.15) 0%, transparent 70%);
+        }
+        .hero .container { position: relative; z-index: 1; }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .hero h1 {
+            max-width: 600px;
+            margin-bottom: 20px;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+        }
+        .hero p {
+            max-width: 520px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 32px;
+            line-height: 1.7;
+        }
+        .hero-btns { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 40px; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all var(--transition);
+        }
+        .btn-primary {
+            background: var(--secondary);
+            color: var(--white);
+        }
+        .btn-primary:hover { background: var(--secondary-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid rgba(255,255,255,0.4);
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.7); }
+        .btn-dark {
+            background: var(--primary);
+            color: var(--white);
+        }
+        .btn-dark:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .trust-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+        .trust-badge svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+        /* ====== SOCIAL PROOF ====== */
+        .social-proof {
+            background: var(--white);
+            padding: 24px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .social-proof .container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 16px 40px;
+        }
+        .proof-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--medium);
+        }
+        .proof-item strong { color: var(--dark); }
+        .stars { color: var(--secondary); font-size: 1rem; letter-spacing: 2px; }
+
+        /* ====== SECTION STYLES ====== */
+        .section {
+            padding: 60px 0;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .section-header p {
+            color: var(--medium);
+            max-width: 550px;
+            margin: 12px auto 0;
+        }
+        .section-label {
+            display: inline-block;
+            font-family: var(--font-heading);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        /* ====== CATEGORIES GRID ====== */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .category-card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            text-align: center;
+            transition: all var(--transition);
+            border: 1px solid var(--light-gray);
+            cursor: pointer;
+        }
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+        .category-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 12px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .category-card h3 { font-size: 1rem; margin-bottom: 4px; }
+        .category-card .count { font-size: 0.8rem; color: var(--medium); }
+
+        /* Category icon colors */
+        .cat-prayer .category-icon { background: #E8F5E9; }
+        .cat-quran .category-icon { background: #E3F2FD; }
+        .cat-foundations .category-icon { background: #FFF3E0; }
+        .cat-daily .category-icon { background: #F3E5F5; }
+        .cat-arabic .category-icon { background: #E0F7FA; }
+        .cat-kids .category-icon { background: #FFF8E1; }
+        .cat-art .category-icon { background: #FCE4EC; }
+
+        /* ====== FILTER TABS ====== */
+        .filter-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+        .filter-tab {
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--medium);
+            background: var(--white);
+            border: 1px solid var(--light-gray);
+            transition: all var(--transition);
+        }
+        .filter-tab:hover,
+        .filter-tab.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        /* ====== PRODUCT CARDS ====== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .product-card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--light-gray);
+            transition: all var(--transition);
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .product-card.hidden { display: none; }
+        .product-image {
+            height: 180px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .product-image .product-icon {
+            font-size: 3rem;
+            opacity: 0.9;
+        }
+        .product-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--secondary);
+            color: var(--white);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .product-badge.bestseller { background: var(--rose); }
+        .product-badge.new { background: var(--teal); }
+        .product-type-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.9);
+            color: var(--dark);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .product-info { padding: 16px; }
+        .product-info h3 {
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .product-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+        }
+        .product-rating .stars { font-size: 0.75rem; }
+        .product-rating span { color: var(--medium); }
+        .product-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .product-price {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .product-price .original {
+            font-size: 0.8rem;
+            color: var(--medium);
+            text-decoration: line-through;
+            font-weight: 500;
+            margin-right: 4px;
+        }
+        .add-to-cart {
+            background: var(--primary);
+            color: var(--white);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+            flex-shrink: 0;
+        }
+        .add-to-cart:hover { background: var(--primary-light); transform: scale(1.1); }
+        .add-to-cart svg { width: 16px; height: 16px; }
+
+        /* Product image backgrounds per category */
+        .bg-prayer { background: linear-gradient(135deg, #a8e6cf 0%, #88d8b0 100%); }
+        .bg-quran { background: linear-gradient(135deg, #a0c4ff 0%, #7eb8da 100%); }
+        .bg-foundations { background: linear-gradient(135deg, #ffd3a0 0%, #f0b878 100%); }
+        .bg-daily { background: linear-gradient(135deg, #d4a0ff 0%, #b87ef0 100%); }
+        .bg-arabic { background: linear-gradient(135deg, #a0f0f0 0%, #78d8d8 100%); }
+        .bg-kids { background: linear-gradient(135deg, #fff3a0 0%, #f0e078 100%); }
+        .bg-art { background: linear-gradient(135deg, #ffa0c4 0%, #f078a0 100%); }
+        .bg-bundle { background: linear-gradient(135deg, var(--primary) 0%, var(--navy) 100%); }
+
+        /* ====== BUNDLES SECTION ====== */
+        .bundles-section {
+            background: var(--navy);
+            color: var(--white);
+            padding: 60px 0;
+        }
+        .bundles-section .section-label { color: var(--secondary); }
+        .bundles-section .section-header p { color: rgba(255,255,255,0.7); }
+        .bundles-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .bundle-card {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            position: relative;
+            transition: all var(--transition);
+        }
+        .bundle-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-4px);
+        }
+        .bundle-card.featured {
+            border-color: var(--secondary);
+            background: rgba(199,160,52,0.08);
+        }
+        .bundle-ribbon {
+            position: absolute;
+            top: -1px;
+            right: 24px;
+            background: var(--secondary);
+            color: var(--white);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 0 0 8px 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .bundle-card h3 { font-size: 1.25rem; margin-bottom: 8px; }
+        .bundle-desc { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+        .bundle-includes {
+            margin-bottom: 20px;
+        }
+        .bundle-includes li {
+            padding: 6px 0;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .bundle-includes li::before {
+            content: '\2713';
+            color: var(--secondary);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .bundle-pricing {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .bundle-price {
+            font-family: var(--font-heading);
+            font-size: 1.75rem;
+            font-weight: 800;
+        }
+        .bundle-original {
+            font-size: 1rem;
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+        .bundle-save {
+            background: rgba(39,174,96,0.2);
+            color: #4ADE80;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 50px;
+        }
+        .bundle-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        .bundle-card.featured .bundle-btn {
+            background: var(--secondary);
+            color: var(--white);
+        }
+        .bundle-card:not(.featured) .bundle-btn {
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .bundle-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* ====== HOW IT WORKS ====== */
+        .how-it-works {
+            background: var(--white);
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .step {
+            text-align: center;
+            padding: 0 20px;
+        }
+        .step-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--white);
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .step h3 { margin-bottom: 8px; }
+        .step p { font-size: 0.9rem; color: var(--medium); }
+
+        /* ====== TESTIMONIALS ====== */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .testimonial-card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            border: 1px solid var(--light-gray);
+        }
+        .testimonial-stars { color: var(--secondary); font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 12px; }
+        .testimonial-text {
+            font-size: 0.95rem;
+            color: var(--dark);
+            margin-bottom: 16px;
+            line-height: 1.7;
+            font-style: italic;
+        }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .testimonial-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .testimonial-name { font-weight: 600; font-size: 0.9rem; }
+        .testimonial-location { font-size: 0.8rem; color: var(--medium); }
+
+        /* ====== ABOUT / TRUST ====== */
+        .trust-section {
+            background: var(--white);
+        }
+        .trust-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .trust-item {
+            text-align: center;
+            padding: 24px;
+        }
+        .trust-item-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 1.5rem;
+        }
+        .trust-item h3 { margin-bottom: 8px; font-size: 1.05rem; }
+        .trust-item p { font-size: 0.85rem; color: var(--medium); }
+
+        /* ====== FAQ ====== */
+        .faq-list {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .faq-item {
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .faq-question {
+            width: 100%;
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            gap: 16px;
+        }
+        .faq-question .arrow {
+            transition: transform var(--transition);
+            flex-shrink: 0;
+            font-size: 1.2rem;
+            color: var(--medium);
+        }
+        .faq-item.active .faq-question .arrow { transform: rotate(180deg); }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .faq-answer-inner {
+            padding: 0 0 20px;
+            font-size: 0.9rem;
+            color: var(--medium);
+            line-height: 1.7;
+        }
+        .faq-item.active .faq-answer { max-height: 300px; }
+
+        /* ====== EMAIL SIGNUP ====== */
+        .signup-section {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: var(--white);
+            padding: 60px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .signup-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0.05;
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.5) 20px, rgba(255,255,255,0.5) 21px);
+        }
+        .signup-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .signup-content h2 { margin-bottom: 12px; }
+        .signup-content p { opacity: 0.85; margin-bottom: 24px; }
+        .signup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .signup-form input {
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            font-size: 0.95rem;
+            font-family: var(--font-body);
+        }
+        .signup-form input::placeholder { color: rgba(255,255,255,0.5); }
+        .signup-form input:focus { outline: none; border-color: var(--secondary); }
+        .signup-form button {
+            padding: 14px 28px;
+            background: var(--secondary);
+            color: var(--white);
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all var(--transition);
+        }
+        .signup-form button:hover { background: var(--secondary-dark); }
+        .signup-note { font-size: 0.75rem; opacity: 0.6; margin-top: 8px; }
+
+        /* ====== FOOTER ====== */
+        .footer {
+            background: var(--dark);
+            color: rgba(255,255,255,0.7);
+            padding: 48px 0 24px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+        .footer-brand .logo { color: var(--white); font-size: 1.3rem; margin-bottom: 12px; }
+        .footer-brand p { font-size: 0.85rem; line-height: 1.6; max-width: 300px; }
+        .footer-col h4 {
+            color: var(--white);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            font-family: var(--font-heading);
+        }
+        .footer-col a {
+            display: block;
+            font-size: 0.85rem;
+            padding: 4px 0;
+            transition: color var(--transition);
+        }
+        .footer-col a:hover { color: var(--secondary); }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.8rem;
+        }
+        .footer-social {
+            display: flex;
+            gap: 16px;
+        }
+        .footer-social a {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+        .footer-social a:hover { background: var(--primary); }
+
+        /* ====== CART SLIDE-OUT ====== */
+        .cart-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 300;
+        }
+        .cart-overlay.active { display: block; }
+        .cart-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            background: var(--white);
+            z-index: 301;
+            transition: right 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-panel.active { right: 0; }
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .cart-header h3 { font-size: 1.1rem; }
+        .cart-close { font-size: 1.5rem; color: var(--medium); padding: 4px; }
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .cart-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        .cart-item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .cart-item-info { flex: 1; }
+        .cart-item-info h4 { font-size: 0.85rem; margin-bottom: 4px; }
+        .cart-item-info .type { font-size: 0.75rem; color: var(--medium); }
+        .cart-item-price {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+        .cart-item-remove {
+            color: var(--rose);
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .cart-item-remove:hover { text-decoration: underline; }
+        .cart-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--medium);
+        }
+        .cart-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .cart-total-label { font-weight: 600; }
+        .cart-total-price {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .checkout-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all var(--transition);
+        }
+        .checkout-btn:hover { background: var(--primary-light); }
+
+        /* ====== SCROLL ANIMATION ====== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ====== TOAST ====== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark);
+            color: var(--white);
+            padding: 14px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 400;
+            transition: transform 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-lg);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast .check { color: var(--success); }
+
+        /* ====== RESPONSIVE: TABLET ====== */
+        @media (min-width: 768px) {
+            .nav-links { display: flex; }
+            .hamburger { display: none; }
+            .hero { padding: 80px 0 100px; }
+            .categories-grid { grid-template-columns: repeat(3, 1fr); }
+            .products-grid { grid-template-columns: repeat(3, 1fr); }
+            .bundles-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps { grid-template-columns: repeat(3, 1fr); }
+            .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+            .trust-grid { grid-template-columns: repeat(2, 1fr); }
+            .signup-form { flex-direction: row; }
+            .signup-form input { flex: 1; }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); }
+            .section { padding: 80px 0; }
+        }
+
+        /* ====== RESPONSIVE: DESKTOP ====== */
+        @media (min-width: 1024px) {
+            .categories-grid { grid-template-columns: repeat(4, 1fr); }
+            .products-grid { grid-template-columns: repeat(4, 1fr); }
+            .bundles-grid { grid-template-columns: repeat(3, 1fr); }
+            .testimonials-grid { grid-template-columns: repeat(3, 1fr); }
+            .trust-grid { grid-template-columns: repeat(4, 1fr); }
+            .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
+            .product-image { height: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Announcement Bar -->
+    <div class="announcement" id="announcement">
+        <span>Ramadan Collection</span> is here! Get 20% off all bundles with code <span>NOOR20</span>
+        <button class="announcement-close" onclick="closeAnnouncement()">&times;</button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container">
+            <a href="#" class="logo">
+                <span class="crescent">&#9770;</span>NoorPath
+            </a>
+            <div class="nav-links">
+                <a href="#categories">Categories</a>
+                <a href="#products">Products</a>
+                <a href="#bundles">Bundles</a>
+                <a href="#about">About</a>
+                <a href="#faq">FAQ</a>
+            </div>
+            <div class="nav-right">
+                <button class="cart-btn" onclick="openCart()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    <span class="cart-count hidden" id="cartCount">0</span>
+                </button>
+                <button class="hamburger" id="hamburgerBtn" onclick="openMobileMenu()">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" onclick="closeMobileMenu()">&times;</button>
+        <a href="#categories" onclick="closeMobileMenu()">Categories</a>
+        <a href="#products" onclick="closeMobileMenu()">Products</a>
+        <a href="#bundles" onclick="closeMobileMenu()">Bundles</a>
+        <a href="#about" onclick="closeMobileMenu()">About</a>
+        <a href="#faq" onclick="closeMobileMenu()">FAQ</a>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">&#9733; Trusted by 2,000+ Muslims worldwide</div>
+            <h1>Begin Your Islamic Journey with Confidence</h1>
+            <p>Beautiful, practical digital guides, planners, and ebooks crafted for new Muslims and curious minds. Instant download, print at home.</p>
+            <div class="hero-btns">
+                <a href="#products" class="btn btn-primary">Browse Products</a>
+                <a href="#bundles" class="btn btn-outline">View Bundles</a>
+            </div>
+            <div class="trust-badges">
+                <div class="trust-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Instant Download
+                </div>
+                <div class="trust-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print at Home
+                </div>
+                <div class="trust-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Money-Back Guarantee
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <div class="social-proof">
+        <div class="container">
+            <div class="proof-item">
+                <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                <strong>4.9/5</strong> average rating
+            </div>
+            <div class="proof-item">
+                <strong>2,000+</strong> happy customers
+            </div>
+            <div class="proof-item">
+                <strong>35+</strong> digital products
+            </div>
+            <div class="proof-item">
+                <strong>15+</strong> countries worldwide
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <section class="section" id="categories">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">Categories</span>
+                <h2>Explore Our Collections</h2>
+                <p>Find the perfect resource for your stage of learning</p>
+            </div>
+            <div class="categories-grid fade-in">
+                <div class="category-card cat-prayer" onclick="filterProducts('prayer')">
+                    <div class="category-icon">&#128591;</div>
+                    <h3>Prayer & Worship</h3>
+                    <span class="count">5 products</span>
+                </div>
+                <div class="category-card cat-quran" onclick="filterProducts('quran')">
+                    <div class="category-icon">&#128214;</div>
+                    <h3>Quran Learning</h3>
+                    <span class="count">4 products</span>
+                </div>
+                <div class="category-card cat-foundations" onclick="filterProducts('foundations')">
+                    <div class="category-icon">&#127775;</div>
+                    <h3>Islamic Foundations</h3>
+                    <span class="count">4 products</span>
+                </div>
+                <div class="category-card cat-daily" onclick="filterProducts('daily')">
+                    <div class="category-icon">&#128197;</div>
+                    <h3>Daily Life & Routines</h3>
+                    <span class="count">4 products</span>
+                </div>
+                <div class="category-card cat-arabic" onclick="filterProducts('arabic')">
+                    <div class="category-icon">&#9997;</div>
+                    <h3>Arabic Basics</h3>
+                    <span class="count">3 products</span>
+                </div>
+                <div class="category-card cat-kids" onclick="filterProducts('kids')">
+                    <div class="category-icon">&#128118;</div>
+                    <h3>Parenting & Kids</h3>
+                    <span class="count">4 products</span>
+                </div>
+                <div class="category-card cat-art" onclick="filterProducts('art')">
+                    <div class="category-icon">&#127912;</div>
+                    <h3>Wall Art & Decor</h3>
+                    <span class="count">4 products</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <section class="section" id="products" style="background: var(--white);">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">Our Products</span>
+                <h2>Digital Resources for Every Step</h2>
+                <p>Professionally designed, thoroughly reviewed, and ready to download</p>
+            </div>
+            <div class="filter-tabs fade-in">
+                <button class="filter-tab active" onclick="filterProducts('all')">All</button>
+                <button class="filter-tab" onclick="filterProducts('prayer')">Prayer</button>
+                <button class="filter-tab" onclick="filterProducts('quran')">Quran</button>
+                <button class="filter-tab" onclick="filterProducts('foundations')">Foundations</button>
+                <button class="filter-tab" onclick="filterProducts('daily')">Daily Life</button>
+                <button class="filter-tab" onclick="filterProducts('arabic')">Arabic</button>
+                <button class="filter-tab" onclick="filterProducts('kids')">Kids</button>
+                <button class="filter-tab" onclick="filterProducts('art')">Wall Art</button>
+            </div>
+            <div class="products-grid" id="productsGrid">
+                <!-- Products injected by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Bundles -->
+    <section class="bundles-section" id="bundles">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">Save More</span>
+                <h2>Value Bundles</h2>
+                <p>Get more for less with our carefully curated bundles</p>
+            </div>
+            <div class="bundles-grid fade-in">
+                <div class="bundle-card">
+                    <h3>New Muslim Starter Bundle</h3>
+                    <p class="bundle-desc">Everything you need to begin your journey</p>
+                    <ul class="bundle-includes">
+                        <li>Islam 101: Complete Beginner's Handbook</li>
+                        <li>Complete Salah Guide for Beginners</li>
+                        <li>Dhikr & Dua Collection</li>
+                        <li>Muslim Daily Routine Planner</li>
+                    </ul>
+                    <div class="bundle-pricing">
+                        <span class="bundle-price">$49.99</span>
+                        <span class="bundle-original">$61.96</span>
+                        <span class="bundle-save">Save $12</span>
+                    </div>
+                    <button class="bundle-btn" onclick="addBundle('starter')">Add Bundle to Cart</button>
+                </div>
+                <div class="bundle-card featured">
+                    <div class="bundle-ribbon">Best Value</div>
+                    <h3>Ramadan Complete Bundle</h3>
+                    <p class="bundle-desc">Make this your best Ramadan yet</p>
+                    <ul class="bundle-includes">
+                        <li>Ramadan Planner & Reflection Journal</li>
+                        <li>Dhikr & Dua Collection</li>
+                        <li>Ramadan Activity Pack for Kids</li>
+                        <li>Set of 5 Islamic Quote Prints</li>
+                        <li>Quran Memorization Tracker</li>
+                    </ul>
+                    <div class="bundle-pricing">
+                        <span class="bundle-price">$39.99</span>
+                        <span class="bundle-original">$52.95</span>
+                        <span class="bundle-save">Save $13</span>
+                    </div>
+                    <button class="bundle-btn" onclick="addBundle('ramadan')">Add Bundle to Cart</button>
+                </div>
+                <div class="bundle-card">
+                    <h3>Ultimate NoorPath Collection</h3>
+                    <p class="bundle-desc">Access our entire library of resources</p>
+                    <ul class="bundle-includes">
+                        <li>All 28+ individual products included</li>
+                        <li>All future product updates</li>
+                        <li>Priority email support</li>
+                        <li>Bonus: Exclusive content</li>
+                    </ul>
+                    <div class="bundle-pricing">
+                        <span class="bundle-price">$149.99</span>
+                        <span class="bundle-original">$210+</span>
+                        <span class="bundle-save">Save $60+</span>
+                    </div>
+                    <button class="bundle-btn" onclick="addBundle('ultimate')">Add Bundle to Cart</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section how-it-works">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">Simple & Easy</span>
+                <h2>How It Works</h2>
+            </div>
+            <div class="steps fade-in">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Browse & Choose</h3>
+                    <p>Explore our collection and find the perfect resources for your learning journey</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Instant Download</h3>
+                    <p>Complete your purchase and get immediate access to your digital files</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Learn & Grow</h3>
+                    <p>Print at home or use on any device. Start your Islamic journey right away</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section" id="testimonials">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">Testimonials</span>
+                <h2>What Our Community Says</h2>
+            </div>
+            <div class="testimonials-grid fade-in">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="testimonial-text">"As a new Muslim, I felt overwhelmed. The New Muslim Starter Bundle was exactly what I needed. The Salah guide is so clear and easy to follow. I finally feel confident in my prayers."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">S</div>
+                        <div>
+                            <div class="testimonial-name">Sarah M.</div>
+                            <div class="testimonial-location">London, UK</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="testimonial-text">"The Ramadan Planner completely transformed how I approach the holy month. Everything is organized beautifully. My kids love the activity pack too!"</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">A</div>
+                        <div>
+                            <div class="testimonial-name">Aisha K.</div>
+                            <div class="testimonial-location">Toronto, Canada</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="testimonial-text">"I've been trying to learn Arabic for years. The Arabic Alphabet Workbook made it so much easier. The practice sheets are well-designed and the progression is perfect for beginners."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">O</div>
+                        <div>
+                            <div class="testimonial-name">Omar R.</div>
+                            <div class="testimonial-location">Houston, USA</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About / Trust -->
+    <section class="section trust-section" id="about">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">Why NoorPath</span>
+                <h2>Built with Care, Reviewed for Accuracy</h2>
+                <p>Every product is designed for clarity and reviewed for Islamic authenticity</p>
+            </div>
+            <div class="trust-grid fade-in">
+                <div class="trust-item">
+                    <div class="trust-item-icon">&#128274;</div>
+                    <h3>Secure Payment</h3>
+                    <p>Your payment information is always safe and encrypted</p>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-item-icon">&#8635;</div>
+                    <h3>30-Day Guarantee</h3>
+                    <p>Not satisfied? Get a full refund within 30 days, no questions asked</p>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-item-icon">&#9889;</div>
+                    <h3>Instant Access</h3>
+                    <p>Download your files immediately after purchase, anytime</p>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-item-icon">&#9825;</div>
+                    <h3>Made with Love</h3>
+                    <p>Every resource is thoughtfully crafted for clarity and beauty</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">FAQ</span>
+                <h2>Common Questions</h2>
+            </div>
+            <div class="faq-list fade-in">
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        What format are the digital products in?
+                        <span class="arrow">&#9662;</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">All our products are delivered as high-quality PDF files that you can view on any device (phone, tablet, computer) or print at home. Wall art prints also come in PNG format for high-resolution printing.</div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        How do I access my products after purchase?
+                        <span class="arrow">&#9662;</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">Immediately after your purchase, you'll receive an email with download links. You can also access your files anytime through your account dashboard. Downloads never expire.</div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Can I print these at home?
+                        <span class="arrow">&#9662;</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">Yes! All printable products are designed for standard home printers (US Letter and A4 sizes are included). For best results, we recommend using a color printer with standard or high-quality paper.</div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Are the Islamic contents reviewed for accuracy?
+                        <span class="arrow">&#9662;</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">Absolutely. All our products are reviewed by qualified Islamic educators to ensure accuracy. We follow mainstream Sunni scholarship and clearly source all Quran verses and hadith references.</div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Do you offer refunds?
+                        <span class="arrow">&#9662;</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">Yes! We offer a 30-day money-back guarantee on all products. If you're not satisfied for any reason, contact us and we'll process a full refund promptly.</div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        I'm completely new to Islam. Where should I start?
+                        <span class="arrow">&#9662;</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">We recommend starting with our "New Muslim Starter Bundle" which includes everything you need: an overview of Islamic beliefs, a step-by-step prayer guide, daily dua collection, and a daily planner. It's specifically designed for absolute beginners.</div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Can I share my purchased files with others?
+                        <span class="arrow">&#9662;</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">Each purchase is for personal use only. However, we encourage you to share our store link with family and friends! We also offer family licenses at a discount for some products -- contact us for details.</div>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Do you have products for children?
+                        <span class="arrow">&#9662;</span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">Yes! Check out our "Parenting & Kids" category for activity books, coloring pages, Ramadan activity packs, and a parent's guide to teaching Islam to children. Products are designed for ages 4-12.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Email Signup -->
+    <section class="signup-section">
+        <div class="container">
+            <div class="signup-content fade-in">
+                <h2>Get a Free Daily Dua Checklist</h2>
+                <p>Join 2,000+ Muslims and receive our beautiful printable dua checklist plus weekly Islamic inspiration</p>
+                <form class="signup-form" onsubmit="handleSignup(event)">
+                    <input type="email" placeholder="Your email address" required>
+                    <button type="submit">Get Free Download</button>
+                </form>
+                <p class="signup-note">We respect your privacy. Unsubscribe anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo"><span class="crescent">&#9770;</span>NoorPath</div>
+                    <p>Your guided path to Islamic knowledge. Beautiful, practical digital resources crafted for new Muslims and curious minds.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Categories</h4>
+                    <a href="#" onclick="filterProducts('prayer')">Prayer & Worship</a>
+                    <a href="#" onclick="filterProducts('quran')">Quran Learning</a>
+                    <a href="#" onclick="filterProducts('foundations')">Islamic Foundations</a>
+                    <a href="#" onclick="filterProducts('daily')">Daily Life</a>
+                    <a href="#" onclick="filterProducts('arabic')">Arabic Basics</a>
+                    <a href="#" onclick="filterProducts('kids')">Kids & Parenting</a>
+                    <a href="#" onclick="filterProducts('art')">Wall Art</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <a href="#about">About Us</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#bundles">Bundles</a>
+                    <a href="#">Contact</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Refund Policy</a>
+                    <a href="mailto:hello@noorpath.com">hello@noorpath.com</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 NoorPath. All rights reserved.</span>
+                <div class="footer-social">
+                    <a href="#" aria-label="Instagram">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="white" stroke="none"/></svg>
+                    </a>
+                    <a href="#" aria-label="TikTok">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.43v-7.15a8.16 8.16 0 005.58 2.18V11.2a4.85 4.85 0 01-2-.51z"/></svg>
+                    </a>
+                    <a href="#" aria-label="YouTube">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2 31.9 31.9 0 000 12a31.9 31.9 0 00.5 5.8 3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1A31.9 31.9 0 0024 12a31.9 31.9 0 00-.5-5.8zM9.5 15.5V8.5l6.3 3.5z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Slide-out -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <div class="cart-panel" id="cartPanel">
+        <div class="cart-header">
+            <h3>Your Cart (<span id="cartItemCount">0</span>)</h3>
+            <button class="cart-close" onclick="closeCart()">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="cart-empty" id="cartEmpty">
+                <div class="cart-empty-icon">&#128722;</div>
+                <p>Your cart is empty</p>
+                <a href="#products" class="btn btn-dark" onclick="closeCart()" style="margin-top:16px;">Browse Products</a>
+            </div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display:none;">
+            <div class="cart-total">
+                <span class="cart-total-label">Total</span>
+                <span class="cart-total-price" id="cartTotal">$0.00</span>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span class="check">&#10003;</span>
+        <span id="toastMsg">Added to cart!</span>
+    </div>
+
+    <script>
+        // ====== PRODUCT DATA ======
+        const products = [
+            // Prayer & Worship
+            { id: 'salah-guide', title: 'Complete Salah Guide for Beginners', category: 'prayer', type: 'eBook', price: 12.99, rating: 4.9, reviews: 124, badge: 'bestseller', icon: '&#128591;', bg: 'bg-prayer', desc: 'Step-by-step illustrated prayer guide with transliteration' },
+            { id: 'prayer-tracker', title: 'Daily Prayer Tracker & Journal', category: 'prayer', type: 'Printable', price: 9.99, rating: 4.8, reviews: 89, badge: '', icon: '&#128338;', bg: 'bg-prayer', desc: '30-day prayer tracking journal' },
+            { id: 'wudu-cheatsheet', title: 'Wudu & Prayer Cheat Sheet', category: 'prayer', type: 'Printable', price: 4.99, rating: 4.7, reviews: 156, badge: '', icon: '&#128167;', bg: 'bg-prayer', desc: 'Laminate-ready quick reference card' },
+            { id: 'ramadan-planner', title: 'Ramadan Planner & Reflection Journal', category: 'prayer', type: 'Planner', price: 14.99, rating: 4.9, reviews: 201, badge: 'bestseller', icon: '&#127769;', bg: 'bg-prayer', desc: 'Complete Ramadan planning and reflection guide' },
+            { id: 'dhikr-dua', title: 'Dhikr & Dua Collection', category: 'prayer', type: 'eBook', price: 11.99, rating: 4.8, reviews: 97, badge: '', icon: '&#9825;', bg: 'bg-prayer', desc: 'Morning & evening remembrance with transliteration' },
+
+            // Quran Learning
+            { id: 'quran-beginners', title: 'Quran Reading for Absolute Beginners', category: 'quran', type: 'eBook', price: 16.99, rating: 4.9, reviews: 178, badge: 'bestseller', icon: '&#128214;', bg: 'bg-quran', desc: 'From Arabic letters to your first surah' },
+            { id: 'juz-amma', title: 'Juz Amma Study Companion', category: 'quran', type: 'eBook', price: 14.99, rating: 4.8, reviews: 63, badge: '', icon: '&#128216;', bg: 'bg-quran', desc: 'Last 30th of Quran with notes and tafsir' },
+            { id: 'quran-tracker', title: 'Quran Memorization Tracker & Planner', category: 'quran', type: 'Planner', price: 12.99, rating: 4.7, reviews: 85, badge: 'new', icon: '&#10004;', bg: 'bg-quran', desc: 'Track your hifz progress beautifully' },
+            { id: 'tajweed-cards', title: 'Tajweed Rules Quick Reference Cards', category: 'quran', type: 'Printable', price: 8.99, rating: 4.6, reviews: 42, badge: '', icon: '&#127912;', bg: 'bg-quran', desc: 'Set of 12 printable reference cards' },
+
+            // Islamic Foundations
+            { id: 'islam-101', title: 'Islam 101: The Complete Beginner\'s Handbook', category: 'foundations', type: 'eBook', price: 19.99, rating: 4.9, reviews: 215, badge: 'bestseller', icon: '&#127775;', bg: 'bg-foundations', desc: 'Comprehensive guide to the basics of Islam' },
+            { id: 'five-pillars', title: 'Five Pillars Explained (Visual Guide)', category: 'foundations', type: 'eBook', price: 12.99, rating: 4.8, reviews: 132, badge: '', icon: '&#127963;', bg: 'bg-foundations', desc: 'Beautiful visual breakdown of the five pillars' },
+            { id: 'new-muslim-kit', title: 'New Muslim Welcome Kit', category: 'foundations', type: 'Bundle', price: 29.99, rating: 4.9, reviews: 88, badge: 'bestseller', icon: '&#127873;', bg: 'bg-foundations', desc: 'Guides, checklists, glossary - everything to start' },
+            { id: 'glossary', title: 'Islamic Terminology Glossary', category: 'foundations', type: 'eBook', price: 7.99, rating: 4.6, reviews: 54, badge: '', icon: '&#128218;', bg: 'bg-foundations', desc: '200+ essential Islamic terms explained' },
+
+            // Daily Life & Routines
+            { id: 'daily-planner', title: 'Muslim Daily Routine Planner', category: 'daily', type: 'Planner', price: 14.99, rating: 4.8, reviews: 143, badge: '', icon: '&#128197;', bg: 'bg-daily', desc: 'Undated 90-day planner with Islamic focus' },
+            { id: 'habit-tracker', title: 'Islamic Habit Tracker', category: 'daily', type: 'Printable', price: 6.99, rating: 4.7, reviews: 76, badge: '', icon: '&#9989;', bg: 'bg-daily', desc: 'Monthly printable habit tracking set' },
+            { id: 'halal-living', title: 'Halal Living Guide', category: 'daily', type: 'eBook', price: 13.99, rating: 4.7, reviews: 67, badge: 'new', icon: '&#127807;', bg: 'bg-daily', desc: 'Food, finance, and lifestyle basics' },
+            { id: 'islamic-finance', title: 'Islamic Finance Starter Guide', category: 'daily', type: 'eBook', price: 15.99, rating: 4.8, reviews: 91, badge: '', icon: '&#128176;', bg: 'bg-daily', desc: 'Understanding halal investing and avoiding riba' },
+
+            // Arabic Basics
+            { id: 'arabic-workbook', title: 'Arabic Alphabet Workbook', category: 'arabic', type: 'Workbook', price: 11.99, rating: 4.8, reviews: 134, badge: '', icon: '&#9997;', bg: 'bg-arabic', desc: 'Practice sheets with guided exercises' },
+            { id: 'arabic-phrases', title: 'Essential Arabic Phrases for Muslims', category: 'arabic', type: 'eBook', price: 9.99, rating: 4.7, reviews: 58, badge: '', icon: '&#128172;', bg: 'bg-arabic', desc: '100 essential phrases with pronunciation guide' },
+            { id: 'arabic-practice', title: 'Arabic Writing Practice Sheets', category: 'arabic', type: 'Printable', price: 5.99, rating: 4.6, reviews: 43, badge: '', icon: '&#128221;', bg: 'bg-arabic', desc: 'Printable practice sheets for all letters' },
+
+            // Parenting & Kids
+            { id: 'kids-activity', title: 'My First Islamic Activity Book', category: 'kids', type: 'Printable', price: 12.99, rating: 4.9, reviews: 167, badge: 'bestseller', icon: '&#127752;', bg: 'bg-kids', desc: 'Fun Islamic activities for ages 4-8' },
+            { id: 'ramadan-kids', title: 'Ramadan Activity Pack for Kids', category: 'kids', type: 'Printable', price: 10.99, rating: 4.8, reviews: 112, badge: '', icon: '&#127769;', bg: 'bg-kids', desc: 'Games, puzzles, and coloring for Ramadan' },
+            { id: 'parenting-guide', title: 'Teaching Islam to Children: Parent\'s Guide', category: 'kids', type: 'eBook', price: 16.99, rating: 4.8, reviews: 73, badge: '', icon: '&#128106;', bg: 'bg-kids', desc: 'Practical guide for Muslim parents' },
+            { id: 'coloring-pages', title: 'Islamic Coloring Pages Collection', category: 'kids', type: 'Printable', price: 7.99, rating: 4.7, reviews: 95, badge: '', icon: '&#127912;', bg: 'bg-kids', desc: '50 beautiful Islamic coloring pages' },
+
+            // Wall Art & Decor
+            { id: 'bismillah-print', title: 'Bismillah Modern Calligraphy Print', category: 'art', type: 'Digital Art', price: 6.99, rating: 4.8, reviews: 89, badge: '', icon: '&#128396;', bg: 'bg-art', desc: 'Multiple sizes included for home printing' },
+            { id: '99-names', title: '99 Names of Allah Poster', category: 'art', type: 'Digital Art', price: 9.99, rating: 4.9, reviews: 121, badge: 'bestseller', icon: '&#10024;', bg: 'bg-art', desc: 'Modern typography poster design' },
+            { id: 'ayatul-kursi', title: 'Ayatul Kursi Minimalist Print', category: 'art', type: 'Digital Art', price: 6.99, rating: 4.7, reviews: 67, badge: '', icon: '&#127775;', bg: 'bg-art', desc: 'Clean minimalist wall art design' },
+            { id: 'quote-prints', title: 'Set of 5 Islamic Quote Prints', category: 'art', type: 'Bundle', price: 19.99, rating: 4.8, reviews: 83, badge: '', icon: '&#128444;', bg: 'bg-art', desc: 'Beautifully designed inspirational quotes' },
+        ];
+
+        const bundles = {
+            starter: { id: 'bundle-starter', title: 'New Muslim Starter Bundle', price: 49.99, icon: '&#127873;', bg: 'bg-bundle', type: 'Bundle' },
+            ramadan: { id: 'bundle-ramadan', title: 'Ramadan Complete Bundle', price: 39.99, icon: '&#127769;', bg: 'bg-bundle', type: 'Bundle' },
+            ultimate: { id: 'bundle-ultimate', title: 'Ultimate NoorPath Collection', price: 149.99, icon: '&#10024;', bg: 'bg-bundle', type: 'Bundle' },
+        };
+
+        // ====== CART ======
+        let cart = JSON.parse(localStorage.getItem('noorpath-cart') || '[]');
+
+        function updateCartUI() {
+            const countEl = document.getElementById('cartCount');
+            const itemsEl = document.getElementById('cartItems');
+            const emptyEl = document.getElementById('cartEmpty');
+            const footerEl = document.getElementById('cartFooter');
+            const totalEl = document.getElementById('cartTotal');
+            const itemCountEl = document.getElementById('cartItemCount');
+
+            countEl.textContent = cart.length;
+            countEl.classList.toggle('hidden', cart.length === 0);
+            itemCountEl.textContent = cart.length;
+
+            if (cart.length === 0) {
+                emptyEl.style.display = '';
+                footerEl.style.display = 'none';
+                // Remove cart items but keep empty state
+                Array.from(itemsEl.querySelectorAll('.cart-item')).forEach(el => el.remove());
+            } else {
+                emptyEl.style.display = 'none';
+                footerEl.style.display = '';
+                // Rebuild items
+                Array.from(itemsEl.querySelectorAll('.cart-item')).forEach(el => el.remove());
+                let total = 0;
+                cart.forEach((item, i) => {
+                    total += item.price;
+                    const div = document.createElement('div');
+                    div.className = 'cart-item';
+                    div.innerHTML = `
+                        <div class="cart-item-image ${item.bg}">${item.icon}</div>
+                        <div class="cart-item-info">
+                            <h4>${item.title}</h4>
+                            <span class="type">${item.type}</span>
+                            <button class="cart-item-remove" onclick="removeFromCart(${i})">Remove</button>
+                        </div>
+                        <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                    `;
+                    itemsEl.insertBefore(div, emptyEl);
+                });
+                totalEl.textContent = '$' + total.toFixed(2);
+            }
+            localStorage.setItem('noorpath-cart', JSON.stringify(cart));
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            if (cart.find(item => item.id === productId)) {
+                showToast('Already in cart!');
+                return;
+            }
+            cart.push({ id: product.id, title: product.title, price: product.price, icon: product.icon, bg: product.bg, type: product.type });
+            updateCartUI();
+            showToast(product.title + ' added to cart!');
+        }
+
+        function addBundle(key) {
+            const bundle = bundles[key];
+            if (!bundle) return;
+            if (cart.find(item => item.id === bundle.id)) {
+                showToast('Already in cart!');
+                return;
+            }
+            cart.push({ ...bundle });
+            updateCartUI();
+            showToast(bundle.title + ' added to cart!');
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function openCart() { document.getElementById('cartOverlay').classList.add('active'); document.getElementById('cartPanel').classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeCart() { document.getElementById('cartOverlay').classList.remove('active'); document.getElementById('cartPanel').classList.remove('active'); document.body.style.overflow = ''; }
+
+        function checkout() {
+            alert('Thank you for your interest! This store will soon be available on Shopify. Stay tuned!');
+        }
+
+        // ====== RENDER PRODUCTS ======
+        function renderProducts(filter = 'all') {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+            const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
+            filtered.forEach(p => {
+                const badgeHTML = p.badge === 'bestseller' ? '<span class="product-badge bestseller">Best Seller</span>' :
+                                  p.badge === 'new' ? '<span class="product-badge new">New</span>' : '';
+                const starsHTML = '&#9733;'.repeat(Math.floor(p.rating)) + (p.rating % 1 >= 0.5 ? '&#9734;' : '');
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.dataset.category = p.category;
+                card.innerHTML = `
+                    <div class="product-image ${p.bg}">
+                        <span class="product-icon">${p.icon}</span>
+                        ${badgeHTML}
+                        <span class="product-type-badge">${p.type}</span>
+                    </div>
+                    <div class="product-info">
+                        <h3>${p.title}</h3>
+                        <div class="product-meta">
+                            <div class="product-rating">
+                                <span class="stars">${starsHTML}</span>
+                                <span>${p.rating} (${p.reviews})</span>
+                            </div>
+                        </div>
+                        <div class="product-bottom">
+                            <span class="product-price">$${p.price.toFixed(2)}</span>
+                            <button class="add-to-cart" onclick="addToCart('${p.id}')" aria-label="Add to cart">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ====== FILTER ======
+        function filterProducts(category) {
+            // Update tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.textContent.toLowerCase().includes(category === 'all' ? 'all' : category.slice(0, 4)));
+            });
+            renderProducts(category);
+            // Scroll to products
+            const el = document.getElementById('products');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ====== MOBILE MENU ======
+        function openMobileMenu() { document.getElementById('mobileMenu').classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('active'); document.body.style.overflow = ''; }
+
+        // ====== FAQ ACCORDION ======
+        function toggleFaq(btn) {
+            const item = btn.parentElement;
+            const wasActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+            if (!wasActive) item.classList.add('active');
+        }
+
+        // ====== ANNOUNCEMENT ======
+        function closeAnnouncement() {
+            document.getElementById('announcement').classList.add('hidden');
+            sessionStorage.setItem('noorpath-announcement', 'closed');
+        }
+        if (sessionStorage.getItem('noorpath-announcement') === 'closed') {
+            document.getElementById('announcement').classList.add('hidden');
+        }
+
+        // ====== TOAST ======
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // ====== EMAIL SIGNUP ======
+        function handleSignup(e) {
+            e.preventDefault();
+            const input = e.target.querySelector('input');
+            showToast('Thanks! Check your email for the free dua checklist.');
+            input.value = '';
+        }
+
+        // ====== SCROLL ANIMATIONS ======
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // ====== INIT ======
+        renderProducts();
+        updateCartUI();
+    </script>
+</body>
+</html>
