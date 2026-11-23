@@ -320,6 +320,30 @@ p { margin: 0; }
 .del:hover { background: var(--fill); color: var(--ink2); }
 .del svg { width: 12px; height: 12px; }
 
+/* Dealer */
+.dealer-bar {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; margin-top: 14px; padding: 12px 16px; min-height: 56px;
+  background: var(--surface); border-radius: var(--r-card); box-shadow: var(--shadow);
+}
+.dealer-bar:active { opacity: .75; }
+.dealer-ic { flex: none; width: 34px; height: 34px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+.dealer-ic svg { width: 20px; height: 20px; }
+.dealer-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dealer-text small { display: block; font-size: 13px; color: var(--ink2); font-weight: 600; }
+.dealer-text b { font-weight: 700; }
+.dealer-bar .go { flex: none; color: var(--accent); font-weight: 600; font-size: 15px; }
+.deal-tag {
+  display: inline-block; vertical-align: 2px; margin-left: 6px; font-family: var(--body); font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  background: var(--accent); color: var(--on-accent); border-radius: 7px; padding: 2px 7px;
+}
+.deal-line { font-size: 15px; color: var(--ink2); margin: 0 4px 12px; }
+.deal-line b { color: var(--ink); }
+.choice { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 0 16px; min-height: 58px; position: relative; font-weight: 600; }
+.choice + .choice::before { content: ""; position: absolute; top: 0; right: 0; left: 16px; height: 1px; background: var(--line); }
+.choice:active { background: var(--fill); }
+.choice .who { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.choice .tick { flex: none; color: var(--accent); width: 20px; height: 20px; }
+
 /* ---------- Sheets ---------- */
 .backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(4, 12, 9, .55); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s ease; }
 .sheet {
@@ -677,6 +701,59 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     return '<div class="ghead" style="--c:' + color(g.color) + '"><span class="wm suit" aria-hidden="true">' + suit(g.icon) + '</span>' + text + '</div>';
   }
 
+  /* ---------- Dealer ---------- */
+  var DEAL_ICON = '<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6" width="10" height="13" rx="2" transform="rotate(-10 8 12.5)"/><rect x="9.5" y="3.5" width="10" height="13" rx="2" transform="rotate(10 14.5 10)"/></svg>';
+  var TICK = '<svg class="tick" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 10.5 4 4 8-9"/></svg>';
+
+  /* g.dealer is whoever dealt the first round; after that the deal moves one seat per round played. */
+  function dealerIndex(g) {
+    if (!g.dealer || !g.players.length) return -1;
+    var first = 0;
+    g.players.forEach(function (p, i) { if (p.id === g.dealer) first = i; });
+    return (first + g.rounds.length) % g.players.length;
+  }
+  function stamp(g, r) {
+    var i = dealerIndex(g);
+    if (i >= 0) r.dealer = g.players[i].id;
+  }
+  function dealtBy(g, r) {
+    var p = r.dealer ? g.players.filter(function (x) { return x.id === r.dealer; })[0] : null;
+    return p ? ' · dijeli ' + esc(p.name) : '';
+  }
+  function dealerLine(g) {
+    var i = dealerIndex(g);
+    return i >= 0 ? '<p class="deal-line">Dijeli <b>' + esc(g.players[i].name) + '</b></p>' : '';
+  }
+  function dealerBar(g) {
+    var i = dealerIndex(g);
+    if (i < 0) {
+      return '<button class="dealer-bar" data-action="ask-dealer"><span class="dealer-ic">' + DEAL_ICON + '</span>' +
+        '<span class="dealer-text"><b>Ko prvi dijeli?</b><small>Poslije ide redom, automatski</small></span><span class="go">Izaberi</span></button>';
+    }
+    var next = g.players[(i + 1) % g.players.length];
+    return '<button class="dealer-bar" data-action="ask-dealer"><span class="dealer-ic">' + DEAL_ICON + '</span>' +
+      '<span class="dealer-text"><small>Sada dijeli</small><b>' + esc(g.players[i].name) + '</b>' +
+      (g.players.length > 1 ? ' <span style="color:var(--ink2);font-weight:500">· zatim ' + esc(next.name) + '</span>' : '') +
+      '</span><span class="go">Promijeni</span></button>';
+  }
+  function renderDealerSheet(d) {
+    var g = game(d.gameId);
+    var theme = themeOf(g);
+    var cur = dealerIndex(g);
+    var h = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">' +
+      '<div class="sheet-bar"><button type="button" class="nav-btn" data-action="close-sheet">Odustani</button>' +
+      '<h2 id="sheet-title">' + (g.rounds.length ? 'Ko sada dijeli?' : 'Ko prvi dijeli?') + '</h2><span></span></div>' +
+      '<p class="deal-line">Poslije svake upisane ' + (g.mode === 'wins' ? 'partije' : 'runde') + ' dijeljenje prelazi na sljedećeg igrača po redu.</p>' +
+      '<div class="group">';
+    g.players.forEach(function (p, i) {
+      h += '<button class="choice" data-action="set-dealer" data-pid="' + p.id + '">' + avatar(theme, i, p.name, true) +
+        '<span class="who">' + esc(p.name) + '</span>' + (i === cur ? TICK : '') + '</button>';
+    });
+    h += '</div>';
+    if (cur >= 0) h += '<button class="btn gray" data-action="clear-dealer">Ne prati ko dijeli</button>';
+    return h + '</div>';
+  }
+
   /* ---------- Landing ---------- */
   function renderLanding() {
     var h = '<header class="hero"><div class="gutter">' +
@@ -772,13 +849,15 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
         '<div class="banner-sub">' + fmt(st.totals[st.winners[0].id]) + (wins ? ' pobjeda' : ' poena') + '. Za novu partiju obriši rezultate ispod.</div></div></div>';
     }
 
+    var di = dealerIndex(g);
+    h += dealerBar(g);
     h += '<div class="group">';
     g.players.forEach(function (p, i) {
       var tot = st.totals[p.id];
       var first = st.leaders.length > 0 && st.rank[p.id] === 1;
       h += '<div class="row' + (first ? ' leader' : '') + '"><span class="rank' + (first ? ' first' : '') + '">' + (st.played ? st.rank[p.id] : '–') + '</span>' +
         avatar(theme, i, p.name) +
-        '<span class="row-main"><span class="row-title" style="display:block">' + esc(p.name) + '</span>';
+        '<span class="row-main"><span class="row-title" style="display:block">' + esc(p.name) + (i === di ? '<span class="deal-tag">dijeli</span>' : '') + '</span>';
       if (g.target) {
         var pct = Math.max(0, Math.min(100, tot / g.target * 100));
         h += '<span class="progress" style="display:block;--c:' + (theme === 'colors' ? QUAD[i % 4][0] : theme === 'plain' ? color(g.color) : 'var(--accent)') + '"><i style="width:' + pct + '%"></i></span>';
@@ -800,7 +879,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
           var v = r.scores[p.id];
           return '<span class="chip">' + esc(p.name) + (wins ? '' : ' <b' + (v < 0 ? ' class="neg"' : '') + '>' + signed(v) + '</b>') + '</span>';
         }).join('');
-        h += '<div class="row hist"><div class="row-main"><div class="hist-title">' + (wins ? 'Partija ' : 'Runda ') + (i + 1) + (wins ? ' · pobjeda' : '') + '</div>' +
+        h += '<div class="row hist"><div class="row-main"><div class="hist-title">' + (wins ? 'Partija ' : 'Runda ') + (i + 1) + (wins ? ' · pobjeda' : '') + dealtBy(g, r) + '</div>' +
           '<div class="chips">' + chips + '</div></div>' +
           '<button class="del" data-action="del-round" data-rid="' + r.id + '" aria-label="Obriši ' + (wins ? 'partiju ' : 'rundu ') + (i + 1) + '">' + ICON.x + '</button></div>';
       }
@@ -899,7 +978,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
       '<div class="sheet-bar"><button type="button" class="nav-btn" data-action="close-sheet">Odustani</button>' +
       '<h2 id="sheet-title">Runda ' + (g.rounds.length + 1) + '</h2>' +
       '<button type="submit" class="nav-btn">Sačuvaj</button></div>' +
-      '<div class="group">';
+      dealerLine(g) + '<div class="group">';
     g.players.forEach(function (p, i) {
       h += '<div class="field">' + avatar(theme, i, p.name || '?', true) +
         '<label class="who" for="r-' + p.id + '">' + esc(p.name) + '</label>' +
@@ -924,7 +1003,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     document.documentElement.classList.toggle('locked', !!sheet);
     if (!sheet) { root.innerHTML = ''; return; }
     var scroll = root.querySelector('.sheet') ? root.querySelector('.sheet').scrollTop : 0;
-    var inner = sheet.type === 'game' ? renderGameForm(sheet) : sheet.type === 'round' ? renderRoundForm(sheet) : renderConfirm(sheet);
+    var inner = sheet.type === 'game' ? renderGameForm(sheet) : sheet.type === 'round' ? renderRoundForm(sheet) : sheet.type === 'dealer' ? renderDealerSheet(sheet) : renderConfirm(sheet);
     var fresh = !root.firstChild;
     root.innerHTML = '<div class="backdrop" data-backdrop>' + inner + '</div>';
     if (!fresh) {
@@ -1002,6 +1081,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
       g.rounds = g.rounds.filter(function (r) { return Object.keys(r.scores).length; });
       if (g.mode !== d.mode) g.rounds = [];
       g.name = name; g.theme = d.theme || inferTheme(name); g.icon = d.icon; g.color = d.color; g.mode = d.mode; g.win = d.win; g.target = target; g.players = list;
+      if (g.dealer && !keep[g.dealer]) g.dealer = list[0].id;
       delete g.example;
     } else {
       g = { id: uid(), name: name, theme: d.theme || inferTheme(name), icon: d.icon, color: d.color, mode: d.mode, win: d.win, target: target, players: list, rounds: [] };
@@ -1025,7 +1105,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
       return renderSheet('r-' + g.players[0].id);
     }
     var r = { id: uid(), scores: scores };
-    g.rounds.push(r);
+    stamp(g, r); g.rounds.push(r);
     save(); sheet = null; renderSheet(); render();
     showToast('Runda ' + g.rounds.length + ' upisana', { type: 'remove', gameId: g.id, roundId: r.id });
   }
@@ -1086,6 +1166,20 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
       sheet.players = sheet.players.filter(function (p) { return p.id !== el.dataset.pid; });
       renderSheet();
     },
+    'ask-dealer': function () { sheet = { type: 'dealer', gameId: view.gameId }; renderSheet(); },
+    'set-dealer': function (el) {
+      /* The pick is who deals now, so walk back by the rounds already played to find the first dealer. */
+      var g = game(view.gameId);
+      var n = g.players.length, now = 0;
+      g.players.forEach(function (p, i) { if (p.id === el.dataset.pid) now = i; });
+      g.dealer = g.players[((now - g.rounds.length) % n + n) % n].id;
+      save(); sheet = null; renderSheet(); render();
+    },
+    'clear-dealer': function () {
+      var g = game(view.gameId);
+      delete g.dealer;
+      save(); sheet = null; renderSheet(); render();
+    },
     'close-sheet': function () { sheet = null; renderSheet(); },
     'new-round': function () {
       var g = game(view.gameId);
@@ -1101,7 +1195,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     'add-win': function (el) {
       var g = game(view.gameId);
       var r = { id: uid(), scores: one(el.dataset.pid, 1) };
-      g.rounds.push(r);
+      stamp(g, r); g.rounds.push(r);
       save(); render();
       var p = g.players.filter(function (x) { return x.id === el.dataset.pid; })[0];
       showToast('Pobjeda: ' + p.name, { type: 'remove', gameId: g.id, roundId: r.id });
