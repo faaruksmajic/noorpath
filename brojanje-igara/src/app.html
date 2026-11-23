@@ -1,0 +1,825 @@
+<title>Brojanje igara</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one narrow column like a phone app. Large title, grouped inset lists, bottom sheets for every form. */
+:root {
+  --bg: #F2F2F7;
+  --surface: #FFFFFF;
+  --sheet: #F2F2F7;
+  --field: #FFFFFF;
+  --fg: #000000;
+  --fg2: rgba(60, 60, 67, .62);
+  --fg3: rgba(60, 60, 67, .32);
+  --sep: rgba(60, 60, 67, .16);
+  --fill: rgba(120, 120, 128, .12);
+  --accent: #007AFF;
+  --danger: #FF3B30;
+  --gold: #B8860B;
+  --gold-bg: rgba(255, 204, 0, .2);
+  --on-accent: #FFFFFF;
+  --bar: rgba(242, 242, 247, .82);
+  --shadow: 0 12px 40px rgba(0, 0, 0, .18);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+  --r-card: 14px;
+  --r-ctl: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --surface: #1C1C1E; --sheet: #1C1C1E; --field: #2C2C2E;
+    --fg: #FFFFFF; --fg2: rgba(235, 235, 245, .62); --fg3: rgba(235, 235, 245, .32);
+    --sep: rgba(84, 84, 88, .62); --fill: rgba(120, 120, 128, .26);
+    --accent: #0A84FF; --danger: #FF453A; --gold: #FFD60A; --gold-bg: rgba(255, 214, 10, .16);
+    --on-accent: #FFFFFF; --bar: rgba(0, 0, 0, .78); --shadow: 0 12px 40px rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --surface: #1C1C1E; --sheet: #1C1C1E; --field: #2C2C2E;
+  --fg: #FFFFFF; --fg2: rgba(235, 235, 245, .62); --fg3: rgba(235, 235, 245, .32);
+  --sep: rgba(84, 84, 88, .62); --fill: rgba(120, 120, 128, .26);
+  --accent: #0A84FF; --danger: #FF453A; --gold: #FFD60A; --gold-bg: rgba(255, 214, 10, .16);
+  --on-accent: #FFFFFF; --bar: rgba(0, 0, 0, .78); --shadow: 0 12px 40px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.3;
+  letter-spacing: -.01em;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--bg);
+}
+html.locked, html.locked body { overflow: hidden; }
+button, input { font: inherit; color: inherit; letter-spacing: inherit; }
+button { border: 0; background: none; padding: 0; cursor: pointer; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: 2px; }
+
+.wrap {
+  max-width: 560px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+
+/* Navigation bar */
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 48px; margin: 0 -8px; padding: 0 8px;
+  background: var(--bar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+}
+.nav-btn { color: var(--accent); min-height: 44px; padding: 0 4px; display: inline-flex; align-items: center; gap: 2px; }
+.nav-btn:active { opacity: .5; }
+.nav-btn svg { width: 12px; height: 20px; }
+.round-btn {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--fill); color: var(--accent);
+  display: inline-grid; place-items: center;
+}
+.round-btn:active { opacity: .6; }
+.round-btn svg { width: 16px; height: 16px; }
+
+h1 { font-size: 34px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; margin: 4px 0 0; text-wrap: balance; overflow-wrap: anywhere; }
+.lede { color: var(--fg2); font-size: 15px; margin: 6px 0 0; }
+.section-label {
+  font-size: 13px; color: var(--fg2); text-transform: uppercase; letter-spacing: .04em;
+  margin: 28px 16px 8px;
+}
+.footnote { font-size: 13px; color: var(--fg2); margin: 8px 16px 0; }
+
+/* Grouped list */
+.group { background: var(--surface); border-radius: var(--r-card); overflow: hidden; margin-top: 20px; }
+.section-label + .group { margin-top: 0; }
+.row { display: flex; align-items: center; gap: 12px; padding: 11px 16px; min-height: 60px; position: relative; width: 100%; text-align: left; }
+.row + .row::before { content: ""; position: absolute; top: 0; right: 0; left: 68px; height: 1px; background: var(--sep); transform: scaleY(.6); }
+.row.plain + .row.plain::before, .row.hist + .row.hist::before { left: 16px; }
+button.row:active { background: var(--fill); }
+.row-main { flex: 1; min-width: 0; }
+.row-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-sub { font-size: 14px; color: var(--fg2); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chev { color: var(--fg3); flex: none; }
+.chev svg { width: 8px; height: 14px; display: block; }
+
+.tile {
+  flex: none; width: 40px; height: 40px; border-radius: 10px; background: var(--c);
+  color: #fff; display: grid; place-items: center; font-size: 22px; line-height: 1;
+  font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", var(--font);
+}
+.tile.big { width: 56px; height: 56px; border-radius: 14px; font-size: 30px; }
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
+  color: var(--fg2); background: var(--fill); border-radius: 6px; padding: 2px 6px; margin-left: 6px; vertical-align: 2px;
+}
+
+/* Game header */
+.game-head { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+.game-head h1 { margin: 0; font-size: 30px; }
+.game-head .lede { margin-top: 3px; }
+
+/* Winner banner */
+.banner {
+  margin-top: 20px; border-radius: var(--r-card); padding: 14px 16px;
+  background: var(--gold-bg); display: flex; align-items: center; gap: 12px;
+}
+.banner-crown { color: var(--gold); flex: none; }
+.banner-crown svg { width: 28px; height: 28px; display: block; }
+.banner-title { font-weight: 700; overflow-wrap: anywhere; }
+.banner-sub { font-size: 14px; color: var(--fg2); }
+
+/* Scoreboard rows */
+.rank { flex: none; width: 22px; text-align: center; font-weight: 700; color: var(--fg3); font-variant-numeric: tabular-nums; }
+.rank.first { color: var(--gold); }
+.avatar {
+  flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: 16px; color: var(--c);
+  background: color-mix(in srgb, var(--c) 18%, transparent);
+}
+.score-row { gap: 10px; }
+.score-row + .score-row::before { left: 48px; }
+.progress { height: 4px; border-radius: 2px; background: var(--fill); margin-top: 6px; overflow: hidden; }
+.progress i { display: block; height: 100%; border-radius: 2px; background: var(--c); transition: width .35s ease; }
+.total { flex: none; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; min-width: 2ch; text-align: right; }
+.plus-one {
+  flex: none; min-width: 52px; height: 36px; padding: 0 12px; border-radius: 18px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.plus-one:active { transform: scale(.94); background: color-mix(in srgb, var(--accent) 28%, transparent); }
+
+/* Buttons */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 50px;
+  border-radius: var(--r-ctl); font-weight: 600; padding: 0 16px; margin-top: 16px;
+  background: var(--accent); color: var(--on-accent);
+}
+.btn:active { opacity: .75; }
+.btn.tinted { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+.btn.gray { background: var(--fill); color: var(--fg); }
+.btn.danger-text { background: var(--surface); color: var(--danger); font-weight: 400; }
+.btn.danger { background: var(--danger); color: #fff; }
+.sheet .btn.danger-text { background: var(--field); }
+
+/* History */
+.hist { align-items: flex-start; min-height: 0; padding-block: 12px; }
+.hist-title { font-size: 13px; color: var(--fg2); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip { font-size: 14px; background: var(--fill); border-radius: 8px; padding: 3px 8px; font-variant-numeric: tabular-nums; max-width: 100%; overflow-wrap: anywhere; }
+.chip b { font-weight: 600; }
+.chip .neg { color: var(--danger); }
+.del {
+  flex: none; width: 30px; height: 30px; border-radius: 50%; color: var(--fg3); display: grid; place-items: center; margin-right: -6px;
+}
+.del:active { background: var(--fill); }
+.del svg { width: 12px; height: 12px; }
+
+.empty { text-align: center; padding: 40px 24px; color: var(--fg2); }
+.empty strong { display: block; color: var(--fg); font-size: 20px; margin-bottom: 6px; }
+
+/* Sheet */
+.backdrop {
+  position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, .4);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: fade .2s ease;
+}
+.sheet {
+  width: 100%; max-width: 560px; max-height: 92%; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--sheet); border-radius: 16px 16px 0 0; box-shadow: var(--shadow);
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  animation: rise .28s cubic-bezier(.2, .8, .2, 1);
+}
+@media (min-width: 640px) {
+  .backdrop { align-items: center; }
+  .sheet { border-radius: 16px; max-height: 86%; }
+}
+.sheet-bar {
+  position: sticky; top: 0; z-index: 1; background: var(--sheet);
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 56px; margin: 0 -4px;
+}
+.sheet-bar h2 { font-size: 17px; font-weight: 600; margin: 0; text-align: center; }
+.sheet-bar .nav-btn:last-child { justify-self: end; font-weight: 600; }
+.sheet .group { background: var(--field); margin-top: 0; }
+.sheet .section-label { margin-top: 22px; }
+.sheet .section-label:first-of-type { margin-top: 6px; }
+.field { display: flex; align-items: center; gap: 12px; padding: 0 16px; min-height: 48px; position: relative; }
+.field + .field::before { content: ""; position: absolute; top: 0; right: 0; left: 16px; height: 1px; background: var(--sep); transform: scaleY(.6); }
+.field label { flex: none; }
+.field input {
+  flex: 1; min-width: 0; border: 0; background: none; padding: 12px 0; outline: none;
+}
+.field input::placeholder { color: var(--fg3); }
+.field input.num { text-align: right; font-variant-numeric: tabular-nums; }
+.field .who { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.field input.pts { flex: none; width: 96px; text-align: right; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sign {
+  flex: none; width: 36px; height: 32px; border-radius: 8px; background: var(--fill); color: var(--fg2); font-weight: 600;
+}
+.sign:active { opacity: .6; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; background: var(--fill); border-radius: 9px; padding: 2px; }
+.seg button { min-height: 32px; border-radius: 7px; font-size: 14px; font-weight: 500; padding: 4px 6px; }
+.seg button[aria-pressed="true"] { background: var(--field); box-shadow: 0 1px 3px rgba(0, 0, 0, .14); font-weight: 600; }
+:root[data-theme="dark"] .seg button[aria-pressed="true"] { background: var(--fg3); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .seg button[aria-pressed="true"] { background: var(--fg3); } }
+.seg-block { margin-top: 10px; }
+.tpl { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 4px; scrollbar-width: none; }
+.tpl::-webkit-scrollbar { display: none; }
+.tpl button {
+  flex: none; display: flex; align-items: center; gap: 8px; background: var(--field); border-radius: 12px; padding: 8px 12px 8px 8px; font-weight: 500; font-size: 15px;
+}
+.tpl button:active { opacity: .6; }
+.tpl .tile { width: 28px; height: 28px; border-radius: 7px; font-size: 16px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 16px; }
+.swatch { width: 30px; height: 30px; border-radius: 50%; background: var(--c); color: #fff; display: grid; place-items: center; font-size: 16px; font-family: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", var(--font); }
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--field), 0 0 0 4px var(--c); }
+.swatch.icon { background: var(--fill); color: var(--fg); }
+.swatch.icon[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--field), 0 0 0 4px var(--accent); }
+.suggest { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 4px 0; }
+.suggest button { background: var(--fill); color: var(--accent); border-radius: 16px; padding: 5px 12px; font-size: 15px; }
+.add-row { color: var(--accent); }
+.error { color: var(--danger); font-size: 14px; margin: 12px 16px 0; }
+.confirm-text { text-align: center; color: var(--fg2); font-size: 15px; margin: 4px 12px 0; }
+
+/* Toast */
+.toast {
+  position: fixed; z-index: 30; left: 50%; transform: translateX(-50%);
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 14px; max-width: calc(100% - 32px);
+  background: var(--fg); color: var(--bg); border-radius: 24px; padding: 10px 10px 10px 18px; font-size: 15px;
+  box-shadow: var(--shadow); animation: rise .25s ease;
+}
+.toast span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toast button { flex: none; color: var(--bg); font-weight: 600; background: color-mix(in srgb, var(--bg) 18%, transparent); border-radius: 16px; padding: 6px 12px; }
+
+@keyframes fade { from { opacity: 0; } }
+@keyframes rise { from { transform: translateY(24px); opacity: 0; } }
+.toast { animation-name: toast-in; }
+@keyframes toast-in { from { transform: translate(-50%, 16px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+<!--BODY-->
+<div class="wrap" id="app"></div>
+<div id="sheet-root"></div>
+<div id="toast-root" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var KEY = 'brojanje-igara-v1';
+  var COLORS = ['#FF3B30', '#FF9500', '#30B350', '#007AFF', '#5856D6', '#FF2D55', '#30A5C7'];
+  var ICONS = ['♠', '♥', '♦', '♣', '★'];
+  var TEMPLATES = [
+    { name: 'Uno', icon: 1, color: 0, mode: 'points', win: 'high', target: 500 },
+    { name: 'Remi', icon: 0, color: 4, mode: 'points', win: 'low', target: '' },
+    { name: 'Tablić', icon: 3, color: 2, mode: 'points', win: 'high', target: 101 },
+    { name: 'Belot', icon: 2, color: 1, mode: 'points', win: 'high', target: 1001 },
+    { name: 'Jamb', icon: 4, color: 6, mode: 'points', win: 'high', target: '' },
+    { name: 'Na pobjede', icon: 4, color: 3, mode: 'wins', win: 'high', target: '' }
+  ];
+
+  var ICON = {
+    plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 2v12M2 8h12"/></svg>',
+    back: '<svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>',
+    chev: '<svg viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m1 1 6 6-6 6"/></svg>',
+    x: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m1 1 10 10M11 1 1 11"/></svg>',
+    crown: '<svg viewBox="0 0 28 28" fill="currentColor"><path d="M4 21h20v2.5H4zM3 8.5l5.5 4.5L14 5l5.5 8L25 8.5 23 19H5z"/></svg>'
+  };
+
+  /* ---------- Storage ---------- */
+  function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); }
+
+  function seed() {
+    var a = uid(), b = uid(), c = uid();
+    return {
+      games: [{
+        id: uid(), name: 'Uno', icon: 1, color: 0, mode: 'points', win: 'high', target: 500, example: true,
+        players: [{ id: a, name: 'Amra' }, { id: b, name: 'Tarik' }, { id: c, name: 'Lejla' }],
+        rounds: [
+          { id: uid(), scores: (function () { var s = {}; s[a] = 64; return s; })() },
+          { id: uid(), scores: (function () { var s = {}; s[c] = 112; return s; })() },
+          { id: uid(), scores: (function () { var s = {}; s[a] = 87; return s; })() }
+        ]
+      }]
+    };
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && Array.isArray(s.games)) return s;
+      }
+    } catch (e) { /* storage unavailable: keep everything in memory */ }
+    return seed();
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  var state = load();
+  var view = { page: 'home', gameId: null };
+  var sheet = null;
+  var toast = null;
+  var toastTimer = null;
+
+  /* ---------- Helpers ---------- */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+  function fmt(n) { return (n < 0 ? '−' : '') + Math.abs(n).toLocaleString('de-DE'); }
+  function signed(n) { return (n > 0 ? '+' : '') + fmt(n); }
+  function players(n) { return n + (n === 1 ? ' igrač' : ' igrača'); }
+  function game(id) { return state.games.filter(function (g) { return g.id === id; })[0] || null; }
+  function color(i) { return COLORS[i % COLORS.length]; }
+  function tile(g, cls) {
+    return '<span class="tile ' + (cls || '') + '" style="--c:' + color(g.color) + '" aria-hidden="true">' + ICONS[g.icon % ICONS.length] + '︎</span>';
+  }
+
+  function totals(g) {
+    var t = {};
+    g.players.forEach(function (p) { t[p.id] = 0; });
+    g.rounds.forEach(function (r) {
+      Object.keys(r.scores).forEach(function (pid) { if (pid in t) t[pid] += r.scores[pid]; });
+    });
+    return t;
+  }
+  function lowWins(g) { return g.mode === 'points' && g.win === 'low'; }
+
+  /* Standing: ranks, the current leader(s) and, once the target is reached, the winner(s). */
+  function standing(g) {
+    var t = totals(g);
+    var low = lowWins(g);
+    var vals = g.players.map(function (p) { return t[p.id]; });
+    var best = vals.length ? (low ? Math.min.apply(null, vals) : Math.max.apply(null, vals)) : 0;
+    var rank = {};
+    g.players.forEach(function (p) {
+      rank[p.id] = 1 + vals.filter(function (v) { return low ? v < t[p.id] : v > t[p.id]; }).length;
+    });
+    var top = g.players.filter(function (p) { return t[p.id] === best; });
+    var played = g.rounds.length > 0;
+    var allTied = top.length === g.players.length && g.players.length > 1;
+    var finished = !!g.target && played && vals.some(function (v) { return v >= g.target; });
+    return {
+      totals: t, rank: rank, played: played,
+      leaders: played && !allTied ? top : [],
+      winners: finished && !allTied ? top : [],
+      finished: finished
+    };
+  }
+  function names(list) { return list.map(function (p) { return p.name; }).join(' i '); }
+
+  function rules(g) {
+    var parts = [];
+    if (g.mode === 'wins') parts.push('Broje se pobjede');
+    else parts.push(g.win === 'low' ? 'Pobjeđuje najmanje poena' : 'Pobjeđuje najviše poena');
+    if (g.target) {
+      parts.push(g.mode === 'wins' ? 'igra se do ' + fmt(g.target) : (g.win === 'low' ? 'kraj na ' + fmt(g.target) : 'igra se do ' + fmt(g.target)));
+    }
+    return parts.join(' · ');
+  }
+
+  /* ---------- Views ---------- */
+  function renderHome() {
+    var h = '<div class="nav"><span></span>' +
+      '<button class="round-btn" data-action="new-game" aria-label="Nova igra">' + ICON.plus + '</button></div>' +
+      '<h1>Brojanje igara</h1>' +
+      '<p class="lede">Poeni i pobjede za kartaške večeri.</p>';
+
+    if (!state.games.length) {
+      h += '<div class="empty"><strong>Nema igara</strong>Dodaj Uno, Remi ili bilo koju igru i počni brojati.</div>';
+    } else {
+      h += '<div class="group">';
+      state.games.forEach(function (g) {
+        var st = standing(g);
+        var status = st.winners.length ? 'Pobjednik: ' + names(st.winners)
+          : st.leaders.length ? 'Vodi ' + names(st.leaders) + ' (' + fmt(st.totals[st.leaders[0].id]) + ')'
+          : st.played ? 'Izjednačeno' : 'Još nema rezultata';
+        h += '<button class="row" data-action="open-game" data-id="' + g.id + '">' + tile(g) +
+          '<span class="row-main"><span class="row-title">' + esc(g.name) + (g.example ? '<span class="badge">Primjer</span>' : '') + '</span>' +
+          '<span class="row-sub" style="display:block">' + players(g.players.length) + ' · ' + esc(status) + '</span></span>' +
+          '<span class="chev">' + ICON.chev + '</span></button>';
+      });
+      h += '</div>';
+      if (state.games.some(function (g) { return g.example; })) {
+        h += '<p class="footnote">Uno s oznakom Primjer je ogledna igra s izmišljenim igračima. Uredi je ili obriši kad dodaš svoju.</p>';
+      }
+    }
+    h += '<button class="btn" data-action="new-game">' + 'Nova igra</button>';
+    return h;
+  }
+
+  function renderGame(g) {
+    var st = standing(g);
+    var wins = g.mode === 'wins';
+    var h = '<div class="nav"><button class="nav-btn" data-action="home">' + ICON.back + '&nbsp;Igre</button>' +
+      '<button class="nav-btn" data-action="edit-game">Uredi</button></div>' +
+      '<div class="game-head">' + tile(g, 'big') + '<div style="min-width:0"><h1>' + esc(g.name) + '</h1>' +
+      '<p class="lede">' + esc(rules(g)) + '</p></div></div>';
+
+    if (st.winners.length) {
+      h += '<div class="banner"><span class="banner-crown">' + ICON.crown + '</span><div style="min-width:0">' +
+        '<div class="banner-title">' + esc(names(st.winners)) + (st.winners.length > 1 ? ' dijele pobjedu' : ' pobjeđuje') + '</div>' +
+        '<div class="banner-sub">' + (wins ? fmt(st.totals[st.winners[0].id]) + ' pobjeda' : fmt(st.totals[st.winners[0].id]) + ' poena') + '. Za novu partiju obriši rezultate ispod.</div></div></div>';
+    }
+
+    h += '<div class="group">';
+    g.players.forEach(function (p, i) {
+      var tot = st.totals[p.id];
+      var first = st.played && st.leaders.length && st.rank[p.id] === 1;
+      h += '<div class="row score-row"><span class="rank' + (first ? ' first' : '') + '">' + (st.played ? st.rank[p.id] : '–') + '</span>' +
+        '<span class="avatar" style="--c:' + color(i) + '" aria-hidden="true">' + esc(p.name.trim().charAt(0).toUpperCase()) + '</span>' +
+        '<span class="row-main"><span class="row-title" style="display:block">' + esc(p.name) + '</span>';
+      if (g.target) {
+        var pct = Math.max(0, Math.min(100, tot / g.target * 100));
+        h += '<span class="progress" style="display:block;--c:' + color(g.color) + '"><i style="width:' + pct + '%"></i></span>';
+      }
+      h += '</span><span class="total">' + fmt(tot) + '</span>';
+      if (wins) h += '<button class="plus-one" data-action="add-win" data-pid="' + p.id + '" aria-label="Pobjeda za ' + esc(p.name) + '">+1</button>';
+      h += '</div>';
+    });
+    h += '</div>';
+
+    if (!wins) h += '<button class="btn" data-action="new-round">Upiši rundu</button>';
+    else h += '<p class="footnote">Dodirni +1 kod igrača koji je dobio partiju.</p>';
+
+    if (g.rounds.length) {
+      h += '<div class="section-label">' + (wins ? 'Partije' : 'Runde') + '</div><div class="group">';
+      for (var i = g.rounds.length - 1; i >= 0; i--) {
+        var r = g.rounds[i];
+        var chips = g.players.filter(function (p) { return r.scores[p.id]; }).map(function (p) {
+          var v = r.scores[p.id];
+          return '<span class="chip">' + esc(p.name) + (wins ? '' : ' <b' + (v < 0 ? ' class="neg"' : '') + '>' + signed(v) + '</b>') + '</span>';
+        }).join('');
+        h += '<div class="row hist"><div class="row-main"><div class="hist-title">' + (wins ? 'Partija ' : 'Runda ') + (i + 1) + (wins ? ' · pobjeda' : '') + '</div>' +
+          '<div class="chips">' + chips + '</div></div>' +
+          '<button class="del" data-action="del-round" data-rid="' + r.id + '" aria-label="Obriši ' + (wins ? 'partiju ' : 'rundu ') + (i + 1) + '">' + ICON.x + '</button></div>';
+      }
+      h += '</div><button class="btn danger-text" data-action="ask-reset">Obriši rezultate i počni ispočetka</button>';
+    }
+    return h;
+  }
+
+  function render() {
+    var g = view.page === 'game' ? game(view.gameId) : null;
+    if (view.page === 'game' && !g) view = { page: 'home', gameId: null };
+    document.getElementById('app').innerHTML = g ? renderGame(g) : renderHome();
+  }
+
+  /* ---------- Sheets ---------- */
+  function seg(action, value, options) {
+    return '<div class="seg">' + options.map(function (o) {
+      return '<button type="button" data-action="' + action + '" data-v="' + o[0] + '" aria-pressed="' + (o[0] === value) + '">' + o[1] + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function renderGameForm(d) {
+    var h = '<form class="sheet" id="game-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" novalidate>' +
+      '<div class="sheet-bar"><button type="button" class="nav-btn" data-action="close-sheet">Odustani</button>' +
+      '<h2 id="sheet-title">' + (d.id ? 'Uredi igru' : 'Nova igra') + '</h2>' +
+      '<button type="submit" class="nav-btn">Sačuvaj</button></div>';
+
+    if (!d.id) {
+      h += '<div class="section-label">Brzi izbor</div><div class="tpl">' + TEMPLATES.map(function (t, i) {
+        return '<button type="button" data-action="use-template" data-i="' + i + '">' + tile(t) + esc(t.name) + '</button>';
+      }).join('') + '</div>';
+    }
+
+    h += '<div class="section-label">Igra</div><div class="group">' +
+      '<div class="field"><input id="f-name" type="text" maxlength="40" autocomplete="off" placeholder="Naziv igre" aria-label="Naziv igre" value="' + esc(d.name) + '"></div>' +
+      '<div class="swatches">' + COLORS.map(function (c, i) {
+        return '<button type="button" class="swatch" style="--c:' + c + '" data-action="set-color" data-v="' + i + '" aria-pressed="' + (i === d.color) + '" aria-label="Boja ' + (i + 1) + '"></button>';
+      }).join('') + '</div>' +
+      '<div class="swatches" style="padding-top:0">' + ICONS.map(function (ic, i) {
+        return '<button type="button" class="swatch icon" data-action="set-icon" data-v="' + i + '" aria-pressed="' + (i === d.icon) + '" aria-label="Znak ' + (i + 1) + '">' + ic + '︎</button>';
+      }).join('') + '</div></div>';
+
+    h += '<div class="section-label">Brojanje</div>' + seg('set-mode', d.mode, [['points', 'Poeni'], ['wins', 'Pobjede']]);
+    if (d.mode === 'points') {
+      h += '<div class="seg-block">' + seg('set-win', d.win, [['high', 'Pobjeđuje najviše'], ['low', 'Pobjeđuje najmanje']]) + '</div>';
+    }
+    h += '<div class="group" style="margin-top:10px"><div class="field"><label for="f-target">' +
+      (d.mode === 'wins' ? 'Igra se do pobjeda' : (d.win === 'low' ? 'Kraj kad neko skupi' : 'Igra se do poena')) + '</label>' +
+      '<input id="f-target" class="num" type="text" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Bez granice" value="' + esc(d.target) + '"></div></div>';
+
+    h += '<div class="section-label">Igrači</div><div class="group">';
+    d.players.forEach(function (p, i) {
+      h += '<div class="field"><span class="avatar" style="--c:' + color(i) + ';width:28px;height:28px;font-size:13px" aria-hidden="true">' + (i + 1) + '</span>' +
+        '<input type="text" id="f-p-' + p.id + '" data-pid="' + p.id + '" maxlength="24" autocomplete="off" enterkeyhint="next" placeholder="Ime igrača" aria-label="Ime igrača ' + (i + 1) + '" value="' + esc(p.name) + '">' +
+        '<button type="button" class="del" data-action="remove-player" data-pid="' + p.id + '" aria-label="Ukloni igrača ' + (i + 1) + '">' + ICON.x + '</button></div>';
+    });
+    h += '<button type="button" class="field add-row" data-action="add-player" style="width:100%">Dodaj igrača</button></div>';
+
+    var known = knownNames(d);
+    if (known.length) {
+      h += '<div class="suggest">' + known.map(function (n) {
+        return '<button type="button" data-action="suggest-player" data-name="' + esc(n) + '">+ ' + esc(n) + '</button>';
+      }).join('') + '</div>';
+    }
+    if (d.error) h += '<p class="error" role="alert">' + esc(d.error) + '</p>';
+    if (d.id) h += '<button type="button" class="btn danger-text" data-action="ask-delete" style="margin-top:28px">Obriši igru</button>';
+    return h + '</form>';
+  }
+
+  function knownNames(d) {
+    var have = {};
+    d.players.forEach(function (p) { have[p.name.trim().toLowerCase()] = 1; });
+    var out = [];
+    state.games.forEach(function (g) {
+      if (g.example) return;
+      g.players.forEach(function (p) {
+        var k = p.name.trim().toLowerCase();
+        if (!have[k]) { have[k] = 1; out.push(p.name); }
+      });
+    });
+    return out.slice(0, 8);
+  }
+
+  function renderRoundForm(d) {
+    var g = game(d.gameId);
+    var h = '<form class="sheet" id="round-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" novalidate>' +
+      '<div class="sheet-bar"><button type="button" class="nav-btn" data-action="close-sheet">Odustani</button>' +
+      '<h2 id="sheet-title">Runda ' + (g.rounds.length + 1) + '</h2>' +
+      '<button type="submit" class="nav-btn">Sačuvaj</button></div>' +
+      '<div class="group">';
+    g.players.forEach(function (p, i) {
+      h += '<div class="field"><span class="avatar" style="--c:' + color(i) + ';width:28px;height:28px;font-size:13px" aria-hidden="true">' + esc(p.name.trim().charAt(0).toUpperCase()) + '</span>' +
+        '<label class="who" for="r-' + p.id + '">' + esc(p.name) + '</label>' +
+        '<button type="button" class="sign" data-action="flip-sign" data-pid="' + p.id + '" aria-label="Promijeni predznak za ' + esc(p.name) + '">±</button>' +
+        '<input class="pts" id="r-' + p.id + '" data-pid="' + p.id + '" type="text" inputmode="numeric" maxlength="7" autocomplete="off" placeholder="0" value="' + esc(d.values[p.id] || '') + '"></div>';
+    });
+    h += '</div><p class="footnote">Prazno polje znači 0. Dugme ± mijenja poene u minus.</p>';
+    if (d.error) h += '<p class="error" role="alert">' + esc(d.error) + '</p>';
+    return h + '<button type="submit" class="btn">Sačuvaj rundu</button></form>';
+  }
+
+  function renderConfirm(d) {
+    return '<div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="sheet-title">' +
+      '<div class="sheet-bar"><span></span><h2 id="sheet-title">' + esc(d.title) + '</h2><span></span></div>' +
+      '<p class="confirm-text">' + esc(d.text) + '</p>' +
+      '<button class="btn danger" data-action="' + d.yes + '">' + esc(d.label) + '</button>' +
+      '<button class="btn gray" data-action="' + (d.back || 'close-sheet') + '" style="margin-top:10px">Odustani</button></div>';
+  }
+
+  function renderSheet(focusId) {
+    var root = document.getElementById('sheet-root');
+    document.documentElement.classList.toggle('locked', !!sheet);
+    if (!sheet) { root.innerHTML = ''; return; }
+    var scroll = root.querySelector('.sheet') ? root.querySelector('.sheet').scrollTop : 0;
+    var inner = sheet.type === 'game' ? renderGameForm(sheet) : sheet.type === 'round' ? renderRoundForm(sheet) : renderConfirm(sheet);
+    var fresh = !root.firstChild;
+    root.innerHTML = '<div class="backdrop" data-backdrop>' + inner + '</div>';
+    if (!fresh) {
+      root.querySelector('.backdrop').style.animation = 'none';
+      root.querySelector('.sheet').style.animation = 'none';
+      root.querySelector('.sheet').scrollTop = scroll;
+    }
+    var el = focusId ? document.getElementById(focusId) : null;
+    if (el) { el.focus(); if (el.select && focusId.indexOf('f-p-') !== 0) el.select(); }
+  }
+
+  /* Read whatever is typed in the open form back into the draft before re-rendering it. */
+  function syncDraft() {
+    if (!sheet) return;
+    if (sheet.type === 'game') {
+      var n = document.getElementById('f-name'), t = document.getElementById('f-target');
+      if (n) sheet.name = n.value;
+      if (t) sheet.target = t.value;
+      sheet.players.forEach(function (p) {
+        var el = document.getElementById('f-p-' + p.id);
+        if (el) p.name = el.value;
+      });
+    } else if (sheet.type === 'round') {
+      Object.keys(sheet.values).concat(game(sheet.gameId).players.map(function (p) { return p.id; })).forEach(function (pid) {
+        var el = document.getElementById('r-' + pid);
+        if (el) sheet.values[pid] = el.value;
+      });
+    }
+    sheet.error = '';
+  }
+
+  function parseNum(s) {
+    s = String(s || '').replace(/−/g, '-').replace(/[^\d-]/g, '');
+    if (!/^-?\d+$/.test(s)) return 0;
+    return parseInt(s, 10);
+  }
+
+  /* ---------- Toast ---------- */
+  function showToast(text, undo) {
+    toast = { text: text, undo: undo || null };
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast = null; renderToast(); }, 4500);
+    renderToast();
+  }
+  function renderToast() {
+    document.getElementById('toast-root').innerHTML = toast
+      ? '<div class="toast"><span>' + esc(toast.text) + '</span>' + (toast.undo ? '<button data-action="undo">Poništi</button>' : '') + '</div>'
+      : '';
+  }
+
+  /* ---------- Actions ---------- */
+  function blankPlayers() { return [{ id: uid(), name: '' }, { id: uid(), name: '' }]; }
+
+  function saveGame() {
+    syncDraft();
+    var d = sheet;
+    var name = d.name.trim();
+    var list = d.players.map(function (p) { return { id: p.id, name: p.name.trim() }; }).filter(function (p) { return p.name; });
+    if (!name) { d.error = 'Upiši naziv igre.'; return renderSheet('f-name'); }
+    if (!list.length) { d.error = 'Dodaj bar jednog igrača.'; return renderSheet(d.players[0] ? 'f-p-' + d.players[0].id : null); }
+    var target = Math.abs(parseNum(d.target)) || '';
+    var g = d.id ? game(d.id) : null;
+    if (g) {
+      var keep = {};
+      list.forEach(function (p) { keep[p.id] = 1; });
+      g.rounds.forEach(function (r) {
+        Object.keys(r.scores).forEach(function (pid) { if (!keep[pid]) delete r.scores[pid]; });
+      });
+      g.rounds = g.rounds.filter(function (r) { return Object.keys(r.scores).length; });
+      if (g.mode !== d.mode) g.rounds = [];
+      g.name = name; g.icon = d.icon; g.color = d.color; g.mode = d.mode; g.win = d.win; g.target = target; g.players = list;
+      delete g.example;
+    } else {
+      g = { id: uid(), name: name, icon: d.icon, color: d.color, mode: d.mode, win: d.win, target: target, players: list, rounds: [] };
+      state.games.unshift(g);
+      view = { page: 'game', gameId: g.id };
+    }
+    save(); sheet = null; renderSheet(); render();
+    window.scrollTo(0, 0);
+  }
+
+  function saveRound() {
+    syncDraft();
+    var g = game(sheet.gameId);
+    var scores = {};
+    g.players.forEach(function (p) {
+      var v = parseNum(sheet.values[p.id]);
+      if (v) scores[p.id] = v;
+    });
+    if (!Object.keys(scores).length) {
+      sheet.error = 'Upiši poene bar za jednog igrača.';
+      return renderSheet('r-' + g.players[0].id);
+    }
+    var r = { id: uid(), scores: scores };
+    g.rounds.push(r);
+    save(); sheet = null; renderSheet(); render();
+    showToast('Runda ' + g.rounds.length + ' upisana', { type: 'remove', gameId: g.id, roundId: r.id });
+  }
+
+  function removeRound(g, rid) {
+    var i = -1;
+    g.rounds.forEach(function (r, k) { if (r.id === rid) i = k; });
+    if (i < 0) return null;
+    return { round: g.rounds.splice(i, 1)[0], index: i };
+  }
+
+  var actions = {
+    'home': function () { view = { page: 'home', gameId: null }; render(); window.scrollTo(0, 0); },
+    'open-game': function (el) { view = { page: 'game', gameId: el.dataset.id }; render(); window.scrollTo(0, 0); },
+    'new-game': function () {
+      sheet = { type: 'game', id: null, name: '', icon: 0, color: 3, mode: 'points', win: 'high', target: '', players: blankPlayers(), error: '' };
+      renderSheet('f-name');
+    },
+    'edit-game': function () {
+      var g = game(view.gameId);
+      sheet = {
+        type: 'game', id: g.id, name: g.name, icon: g.icon, color: g.color, mode: g.mode, win: g.win, target: g.target ? String(g.target) : '',
+        players: g.players.map(function (p) { return { id: p.id, name: p.name }; }), error: ''
+      };
+      renderSheet();
+    },
+    'use-template': function (el) {
+      syncDraft();
+      var t = TEMPLATES[+el.dataset.i];
+      sheet.name = t.name; sheet.icon = t.icon; sheet.color = t.color; sheet.mode = t.mode; sheet.win = t.win; sheet.target = t.target ? String(t.target) : '';
+      renderSheet(sheet.players[0] ? 'f-p-' + sheet.players[0].id : null);
+    },
+    'set-color': function (el) { syncDraft(); sheet.color = +el.dataset.v; renderSheet(); },
+    'set-icon': function (el) { syncDraft(); sheet.icon = +el.dataset.v; renderSheet(); },
+    'set-mode': function (el) { syncDraft(); sheet.mode = el.dataset.v; renderSheet(); },
+    'set-win': function (el) { syncDraft(); sheet.win = el.dataset.v; renderSheet(); },
+    'add-player': function () {
+      syncDraft();
+      var p = { id: uid(), name: '' };
+      sheet.players.push(p);
+      renderSheet('f-p-' + p.id);
+    },
+    'suggest-player': function (el) {
+      syncDraft();
+      var empty = sheet.players.filter(function (p) { return !p.name.trim(); })[0];
+      if (empty) empty.name = el.dataset.name; else sheet.players.push({ id: uid(), name: el.dataset.name });
+      renderSheet();
+    },
+    'remove-player': function (el) {
+      syncDraft();
+      sheet.players = sheet.players.filter(function (p) { return p.id !== el.dataset.pid; });
+      renderSheet();
+    },
+    'close-sheet': function () { sheet = null; renderSheet(); },
+    'new-round': function () {
+      var g = game(view.gameId);
+      sheet = { type: 'round', gameId: g.id, values: {}, error: '' };
+      renderSheet('r-' + g.players[0].id);
+    },
+    'flip-sign': function (el) {
+      var input = document.getElementById('r-' + el.dataset.pid);
+      var v = input.value.trim().replace(/−/g, '-');
+      input.value = v.charAt(0) === '-' ? v.slice(1) : '-' + v;
+      input.focus();
+    },
+    'add-win': function (el) {
+      var g = game(view.gameId);
+      var s = {}; s[el.dataset.pid] = 1;
+      var r = { id: uid(), scores: s };
+      g.rounds.push(r);
+      save(); render();
+      var p = g.players.filter(function (x) { return x.id === el.dataset.pid; })[0];
+      showToast('Pobjeda: ' + p.name, { type: 'remove', gameId: g.id, roundId: r.id });
+    },
+    'del-round': function (el) {
+      var g = game(view.gameId);
+      var out = removeRound(g, el.dataset.rid);
+      if (!out) return;
+      save(); render();
+      showToast(g.mode === 'wins' ? 'Partija obrisana' : 'Runda obrisana', { type: 'restore', gameId: g.id, round: out.round, index: out.index });
+    },
+    'undo': function () {
+      var u = toast && toast.undo;
+      toast = null; clearTimeout(toastTimer); renderToast();
+      if (!u) return;
+      var g = game(u.gameId);
+      if (!g) return;
+      if (u.type === 'remove') removeRound(g, u.roundId);
+      else if (u.type === 'restore') g.rounds.splice(Math.min(u.index, g.rounds.length), 0, u.round);
+      else if (u.type === 'rounds') g.rounds = u.rounds;
+      save(); render();
+    },
+    'ask-reset': function () {
+      sheet = { type: 'confirm', title: 'Obrisati rezultate?', text: 'Igrači ostaju, a svi upisani rezultati se brišu.', label: 'Obriši rezultate', yes: 'reset' };
+      renderSheet();
+    },
+    'reset': function () {
+      var g = game(view.gameId);
+      var old = g.rounds;
+      g.rounds = []; delete g.example;
+      save(); sheet = null; renderSheet(); render();
+      showToast('Rezultati obrisani', { type: 'rounds', gameId: g.id, rounds: old });
+    },
+    'ask-delete': function () {
+      syncDraft();
+      var draft = sheet;
+      sheet = { type: 'confirm', title: 'Obrisati igru?', text: 'Igra „' + game(draft.id).name + '“ i svi njeni rezultati se trajno brišu.', label: 'Obriši igru', yes: 'delete-game', back: 'back-to-edit', draft: draft };
+      renderSheet();
+    },
+    'back-to-edit': function () { sheet = sheet.draft; renderSheet(); },
+    'delete-game': function () {
+      var id = sheet.draft.id;
+      state.games = state.games.filter(function (g) { return g.id !== id; });
+      save(); sheet = null; view = { page: 'home', gameId: null };
+      renderSheet(); render();
+      showToast('Igra obrisana');
+    }
+  };
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-action]');
+    if (el) { actions[el.dataset.action](el); return; }
+    if (e.target.hasAttribute && e.target.hasAttribute('data-backdrop') && sheet && sheet.type === 'confirm') {
+      actions[sheet.back || 'close-sheet']();
+    }
+  });
+  document.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (e.target.id === 'game-form') saveGame();
+    else if (e.target.id === 'round-form') saveRound();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && sheet) { actions[sheet.back || 'close-sheet'](); return; }
+    /* Enter in a player name moves to the next player, adding a row after the last one. */
+    if (e.key === 'Enter' && sheet && sheet.type === 'game' && e.target.id && e.target.id.indexOf('f-p-') === 0) {
+      e.preventDefault();
+      var ids = sheet.players.map(function (p) { return p.id; });
+      var next = ids[ids.indexOf(e.target.dataset.pid) + 1];
+      if (next) document.getElementById('f-p-' + next).focus();
+      else if (e.target.value.trim()) actions['add-player']();
+    }
+  });
+
+  function start() { render(); renderSheet(); renderToast(); }
+  start();
+})();
+</script>
