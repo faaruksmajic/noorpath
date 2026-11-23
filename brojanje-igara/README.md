@@ -16,3 +16,7 @@ Izvor je `src/app.html`. `node build.js` sklapa samostalni `index.html`.
 ## Objava
 
 Statička stranica bez build koraka: Vercel servira `index.html` direktno (Framework Preset: Other, bez build komande).
+
+## Aplikacija na telefonu
+
+Stranica je PWA: `manifest.webmanifest`, ikone i `sw.js` omogućavaju instalaciju na početni ekran i rad bez interneta. Kod promjene naziva ili adrese ažuriraj `manifest.webmanifest` i konstantu `SITE` u `build.js`, pa pokreni `node build.js`.

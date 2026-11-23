@@ -309,6 +309,16 @@ p { margin: 0; }
 .del:hover { background: var(--fill); color: var(--ink2); }
 .del svg { width: 12px; height: 12px; }
 
+/* Install prompt */
+.install { display: flex; gap: 12px; align-items: center; margin-top: 18px; padding: 14px 12px 14px 16px; background: var(--surface); border-radius: var(--r-card); box-shadow: var(--shadow); }
+.install-text { flex: 1; min-width: 0; font-size: 14.5px; color: var(--ink2); }
+.install-text b { display: block; font-size: 16px; color: var(--ink); }
+.install .mini { flex: none; background: var(--accent); color: var(--on-accent); border-radius: 18px; padding: 8px 14px; font-weight: 700; font-size: 15px; }
+.install .mini:active { transform: scale(.95); }
+.hero-install { display: inline-flex; margin-top: 14px; color: var(--on-felt); font-weight: 600; font-size: 15px; text-decoration: underline; text-underline-offset: 4px; }
+.how-list { margin: 0; padding: 4px 8px 0 28px; display: grid; gap: 12px; }
+.how-list b { font-weight: 700; }
+
 /* Dealer */
 .dealer-bar {
   display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; margin-top: 14px; padding: 12px 16px; min-height: 56px;
@@ -742,6 +752,31 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     return h + '</div>';
   }
 
+  /* ---------- Install as an app (only on the hosted site, where the page sets window.__pwa) ---------- */
+  var HIDE_INSTALL = 'brojanje-igara-install-hidden';
+  var installEvt = null;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  function standalone() {
+    return !!navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  }
+  function canInstall() { return !!window.__pwa && !standalone() && (!!installEvt || isIOS); }
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; if (!sheet) render(); });
+  window.addEventListener('appinstalled', function () { installEvt = null; write(HIDE_INSTALL, '1'); if (!sheet) render(); });
+  function installCard() {
+    if (!canInstall() || read(HIDE_INSTALL)) return '';
+    return '<div class="install"><span class="install-text"><b>Instaliraj na telefon</b>Otvara se kao aplikacija i radi bez interneta.</span>' +
+      '<button class="mini" data-action="install">Instaliraj</button>' +
+      '<button class="del" data-action="hide-install" aria-label="Sakrij">' + ICON.x + '</button></div>';
+  }
+  function installLink() {
+    return canInstall() ? '<br><button class="hero-install" data-action="install">Instaliraj kao aplikaciju</button>' : '';
+  }
+  function renderInfo(d) {
+    return '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">' +
+      '<div class="sheet-bar"><span></span><h2 id="sheet-title">' + esc(d.title) + '</h2><span></span></div>' + d.html +
+      '<button class="btn" data-action="close-sheet" style="margin-top:22px">U redu</button></div>';
+  }
+
   /* ---------- Landing ---------- */
   function renderLanding() {
     var h = '<header class="hero"><div class="gutter">' +
@@ -752,7 +787,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
       '<h1>Ko vodi? <em>Znaš odmah.</em></h1>' +
       '<p class="hero-sub">Brojač poena i pobjeda za Uno, Remi, Tablić i svaku drugu igru. Dodaj igrače, upiši rundu i gotovo.</p>' +
       '<button class="cta" data-action="start">Počni brojati ' + ICON.arrow + '</button>' +
-      '<p class="hero-note">Besplatno, bez naloga i bez instalacije.</p></div>' +
+      '<p class="hero-note">Besplatno i bez naloga.</p>' + installLink() + '</div>' +
       '<div class="hero-art" aria-hidden="true">' +
       '<div class="pcard c1">A<small>♠︎</small><i>♠︎</i></div>' +
       '<div class="pcard c2 red">K<small>♥︎</small><i>♥︎</i></div>' +
@@ -817,6 +852,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
         '<span class="gcard-status">' + esc(status) + '</span></button>';
     });
     h += '<button class="gcard new" data-action="new-game"><span class="plus">' + ICON.plus + '</span>Nova igra</button></div>';
+    h += installCard();
     if (state.games.some(function (g) { return g.example; })) {
       h += '<p class="footnote">Igra s oznakom Primjer ima izmišljene igrače. Uredi je ili obriši kad dodaš svoju.</p>';
     }
@@ -991,7 +1027,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     document.documentElement.classList.toggle('locked', !!sheet);
     if (!sheet) { root.innerHTML = ''; return; }
     var scroll = root.querySelector('.sheet') ? root.querySelector('.sheet').scrollTop : 0;
-    var inner = sheet.type === 'game' ? renderGameForm(sheet) : sheet.type === 'round' ? renderRoundForm(sheet) : sheet.type === 'dealer' ? renderDealerSheet(sheet) : renderConfirm(sheet);
+    var inner = sheet.type === 'game' ? renderGameForm(sheet) : sheet.type === 'round' ? renderRoundForm(sheet) : sheet.type === 'dealer' ? renderDealerSheet(sheet) : sheet.type === 'info' ? renderInfo(sheet) : renderConfirm(sheet);
     var fresh = !root.firstChild;
     root.innerHTML = '<div class="backdrop" data-backdrop>' + inner + '</div>';
     if (!fresh) {
@@ -1168,6 +1204,22 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
       delete g.dealer;
       save(); sheet = null; renderSheet(); render();
     },
+    'install': function () {
+      if (installEvt) {
+        var evt = installEvt;
+        installEvt = null;
+        evt.prompt();
+        if (evt.userChoice) evt.userChoice.then(function () { if (!sheet) render(); });
+        return;
+      }
+      sheet = {
+        type: 'info', title: 'Instaliraj na iPhone',
+        html: '<ol class="how-list"><li>U Safariju dodirni <b>Podijeli</b> (kvadrat sa strelicom prema gore).</li>' +
+          '<li>Izaberi <b>Dodaj na početni ekran</b>.</li><li>Dodirni <b>Dodaj</b>. Ikona se pojavi među aplikacijama.</li></ol>'
+      };
+      renderSheet();
+    },
+    'hide-install': function () { write(HIDE_INSTALL, '1'); render(); },
     'close-sheet': function () { sheet = null; renderSheet(); },
     'new-round': function () {
       var g = game(view.gameId);
