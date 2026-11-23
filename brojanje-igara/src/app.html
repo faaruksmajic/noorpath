@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Serif+Display&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: a felt-green card table opens the landing; the app itself is one narrow column of game cards and a scoreboard, forms in bottom sheets. */
 :root {
@@ -365,6 +365,122 @@ p { margin: 0; }
 .toast span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .toast button { flex: none; color: #1B1502; font-weight: 700; background: var(--chip); border-radius: 18px; padding: 7px 14px; }
 
+
+/* ---------- Game themes: the game screen takes on the look of the game being played ---------- */
+body.t-colors {
+  --bg: #111214; --surface: #1D1F23; --sheet: #1D1F23; --field: #2A2D33;
+  --ink: #FFFFFF; --ink2: rgba(255, 255, 255, .7); --ink3: rgba(255, 255, 255, .38);
+  --line: rgba(255, 255, 255, .14); --fill: rgba(255, 255, 255, .1); --seg-on: rgba(255, 255, 255, .22);
+  --accent: #F7C600; --on-accent: #141200; --accent-soft: rgba(247, 198, 0, .16);
+  --danger: #FF7468; --gold: #F7C600; --gold-bg: rgba(247, 198, 0, .15); --bar: rgba(17, 18, 20, .84);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 8px 24px rgba(0, 0, 0, .35); color-scheme: dark;
+}
+body.t-cards {
+  --bg: #E9E0CC; --surface: #FFFDF6; --sheet: #F4EDDC; --field: #FFFDF6;
+  --ink: #1E1A15; --ink2: rgba(30, 26, 21, .68); --ink3: rgba(30, 26, 21, .36);
+  --line: rgba(30, 26, 21, .14); --fill: rgba(30, 26, 21, .07); --seg-on: #FFFDF6;
+  --accent: #B3261E; --on-accent: #FFFFFF; --accent-soft: rgba(179, 38, 30, .1);
+  --danger: #8F1D17; --gold: #7A5C00; --gold-bg: #F1DF9E; --bar: rgba(233, 224, 204, .86);
+  --shadow: 0 1px 2px rgba(30, 26, 21, .1), 0 8px 22px rgba(30, 26, 21, .1); color-scheme: light;
+  --display: "DM Serif Display", Georgia, "Times New Roman", serif;
+}
+body.t-felt {
+  --bg: #0D3829; --surface: #14503B; --sheet: #124634; --field: #1A5C45;
+  --ink: #F4F1E4; --ink2: rgba(244, 241, 228, .74); --ink3: rgba(244, 241, 228, .42);
+  --line: rgba(244, 241, 228, .16); --fill: rgba(244, 241, 228, .1); --seg-on: rgba(244, 241, 228, .24);
+  --accent: #F2C230; --on-accent: #1B1502; --accent-soft: rgba(242, 194, 48, .16);
+  --danger: #FF9383; --gold: #F2C230; --gold-bg: rgba(242, 194, 48, .16); --bar: rgba(13, 56, 41, .86);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25); color-scheme: dark;
+}
+body.t-dice {
+  --bg: #E8EDF6; --surface: #FFFFFF; --sheet: #E8EDF6; --field: #FFFFFF;
+  --ink: #13203B; --ink2: rgba(19, 32, 59, .68); --ink3: rgba(19, 32, 59, .36);
+  --line: rgba(19, 32, 59, .13); --fill: rgba(19, 32, 59, .07); --seg-on: #FFFFFF;
+  --accent: #1D4FC4; --on-accent: #FFFFFF; --accent-soft: rgba(29, 79, 196, .1);
+  --danger: #C7302B; --gold: #8A6A00; --gold-bg: #FBEDBF; --bar: rgba(232, 237, 246, .86);
+  --shadow: 0 1px 2px rgba(19, 32, 59, .08), 0 8px 24px rgba(19, 32, 59, .1); color-scheme: light;
+}
+body.t-cards .ghead h1, body.t-cards .total, body.t-cards .banner-title, body.t-cards .sheet-bar h2, body.t-cards .field input.pts { font-weight: 400; letter-spacing: 0; }
+body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
+
+/* Four colours (Uno) */
+.gh-colors { background: #1D1F23; padding-right: 150px; min-height: 136px; }
+.gh-colors::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: linear-gradient(90deg, #E5322D 0 25%, #F7C600 25% 50%, #2FA84F 50% 75%, #1F6FD6 75%); }
+.gh-colors h1 { transform: rotate(-3deg) skewX(-8deg); transform-origin: left center; text-shadow: 3px 3px 0 #000; }
+.deck, .hand { position: absolute; right: 12px; top: 20px; width: 128px; height: 100px; }
+.deck span {
+  position: absolute; top: 6px; width: 52px; height: 78px; border-radius: 9px; background: var(--c); color: var(--ct, #fff); border: 3px solid #fff;
+  display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 24px; box-shadow: 0 6px 14px rgba(0, 0, 0, .4);
+}
+.deck span:nth-child(1), .hand span:nth-child(1) { left: 0; transform: rotate(-16deg); top: 14px; }
+.deck span:nth-child(2), .hand span:nth-child(2) { left: 25px; transform: rotate(-5deg); }
+.deck span:nth-child(3), .hand span:nth-child(3) { left: 50px; transform: rotate(6deg); }
+.deck span:nth-child(4) { left: 75px; transform: rotate(17deg); top: 14px; }
+.avatar.av-colors { width: 32px; height: 44px; border-radius: 8px; border: 2.5px solid #fff; transform: rotate(-5deg); color: var(--ct, #fff); }
+.avatar.av-colors.sm { width: 22px; height: 30px; border-width: 2px; border-radius: 6px; font-size: 12px; }
+
+/* Playing cards (Remi, Belot) */
+.gh-cards { background: var(--surface); color: var(--ink); text-align: center; padding: 36px 46px 28px; }
+.gh-cards::before { content: ""; position: absolute; inset: 8px; border: 1.5px solid rgba(30, 26, 21, .28); border-radius: 17px; pointer-events: none; }
+.gh-cards .corner { position: absolute; font-family: var(--display); font-size: 22px; line-height: 1; text-align: center; color: #B3261E; }
+.gh-cards .corner.tl { left: 20px; top: 18px; }
+.gh-cards .corner.br { right: 20px; bottom: 18px; transform: rotate(180deg); }
+.gh-cards .corner small { display: block; font-family: var(--suits); font-size: 16px; margin-top: 2px; }
+.suitrow { position: relative; font-family: var(--suits); font-size: 20px; margin-top: 14px; display: flex; justify-content: center; gap: 16px; line-height: 1; }
+.suitrow b { color: #B3261E; font-weight: 400; }
+.avatar.av-card {
+  width: 32px; height: 44px; border-radius: 6px; background: #FFFDF6; border: 1.5px solid rgba(30, 26, 21, .3); color: #1E1A15;
+  align-content: center; gap: 1px; font-weight: 400; font-size: 17px; line-height: 1; box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+}
+.avatar.av-card.red { color: #B3261E; }
+.avatar.av-card i { font-family: var(--suits); font-style: normal; font-size: 13px; }
+.avatar.av-card.sm { width: 22px; height: 30px; font-size: 13px; border-radius: 4px; }
+.avatar.av-card.sm i { display: none; }
+
+/* Green table (Tablić) */
+.gh-felt { background: radial-gradient(120% 120% at 80% 0%, #1B6349, transparent 65%), #0B3023; border: 1.5px solid rgba(244, 241, 228, .16); padding-right: 140px; min-height: 136px; color: #F4F1E4; }
+.hand span { position: absolute; top: 4px; width: 54px; height: 78px; border-radius: 8px; background: #FFFDF6; color: #17211D; font-family: var(--suits); font-size: 28px; display: grid; place-items: center; box-shadow: 0 6px 16px rgba(0, 0, 0, .35); }
+.hand span.red { color: #D8342F; }
+.avatar.av-chip { border: 3px dashed rgba(255, 255, 255, .88); box-shadow: 0 0 0 2px var(--c), 0 2px 6px rgba(0, 0, 0, .3); }
+.avatar.av-chip.sm { border-width: 2px; }
+
+/* Dice (Jamb) */
+.gh-dice {
+  background-color: #fff; color: #13203B; border: 1.5px solid rgba(29, 79, 196, .3);
+  background-image: linear-gradient(rgba(29, 79, 196, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(29, 79, 196, .13) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.gh-dice h1 { color: #1D4FC4; }
+.dice-row { position: relative; display: flex; gap: 8px; margin-top: 16px; }
+.dice-row svg { width: 34px; height: 34px; filter: drop-shadow(0 2px 3px rgba(19, 32, 59, .22)); }
+.dice-row svg:nth-child(odd) { transform: rotate(-7deg); }
+.dice-row svg:nth-child(even) { transform: rotate(5deg); }
+.avatar.av-die { background: none; border-radius: 0; }
+.avatar.av-die svg { width: 100%; height: 100%; display: block; }
+
+/* The same looks on the home screen cards */
+.gc-colors { background: #17181B; }
+.gc-colors::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: linear-gradient(90deg, #E5322D 0 25%, #F7C600 25% 50%, #2FA84F 50% 75%, #1F6FD6 75%); }
+.gc-colors .wm { display: none; }
+.gc-colors .gcard-ic { background: conic-gradient(#E5322D 0 25%, #F7C600 0 50%, #2FA84F 0 75%, #1F6FD6 0); font-size: 0; border: 2px solid #fff; }
+.gc-cards { background: #FFFDF6; color: #1E1A15; box-shadow: inset 0 0 0 6px #FFFDF6, inset 0 0 0 7.5px rgba(30, 26, 21, .22), var(--shadow); }
+.gc-cards .wm { color: #B3261E; opacity: .14; }
+.gc-cards .gcard-ic { background: rgba(179, 38, 30, .1); color: #B3261E; }
+.gc-cards .badge, .gc-dice .badge { background: rgba(30, 26, 21, .1); }
+.gc-cards .gcard-name { font-family: "DM Serif Display", Georgia, serif; font-weight: 400; letter-spacing: 0; font-size: 26px; }
+.gc-felt { background: radial-gradient(120% 120% at 80% 0%, #1B6349, transparent 65%), #0B3023; color: #F4F1E4; }
+.gc-felt .gcard-ic { background: #F2C230; color: #1B1502; }
+.gc-dice {
+  background-color: #fff; color: #13203B;
+  background-image: linear-gradient(rgba(29, 79, 196, .12) 1px, transparent 1px), linear-gradient(90deg, rgba(29, 79, 196, .12) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.gc-dice .gcard-name { color: #1D4FC4; }
+.gc-dice .gcard-ic { background: rgba(29, 79, 196, .12); color: #1D4FC4; }
+.gc-dice .wm { color: #1D4FC4; opacity: .1; }
+.tpl button[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--accent); color: var(--accent); }
+.tpl.pick-theme button { padding: 9px 14px; }
+
 @keyframes fade { from { opacity: 0; } }
 @keyframes rise { from { transform: translateY(28px); opacity: 0; } }
 @keyframes toast-in { from { transform: translate(-50%, 16px); opacity: 0; } }
@@ -384,12 +500,12 @@ p { margin: 0; }
   var COLORS = ['#D63B3B', '#DB7412', '#1C9A56', '#2D6AE0', '#5B50D6', '#D4357A', '#1590A8'];
   var ICONS = ['♠', '♥', '♦', '♣', '★'];
   var TEMPLATES = [
-    { name: 'Uno', icon: 1, color: 0, mode: 'points', win: 'high', target: 500, how: 'Poeni, igra se do 500' },
-    { name: 'Remi', icon: 0, color: 4, mode: 'points', win: 'low', target: '', how: 'Najmanje poena pobjeđuje' },
-    { name: 'Tablić', icon: 3, color: 2, mode: 'points', win: 'high', target: 101, how: 'Poeni, igra se do 101' },
-    { name: 'Belot', icon: 2, color: 1, mode: 'points', win: 'high', target: 1001, how: 'Poeni, igra se do 1001' },
-    { name: 'Jamb', icon: 4, color: 6, mode: 'points', win: 'high', target: '', how: 'Najviše poena pobjeđuje' },
-    { name: 'Na pobjede', icon: 4, color: 3, mode: 'wins', win: 'high', target: '', how: 'Samo +1 za pobjednika' }
+    { name: 'Uno', theme: 'colors', icon: 1, color: 0, mode: 'points', win: 'high', target: 500, how: 'Poeni, igra se do 500' },
+    { name: 'Remi', theme: 'cards', icon: 0, color: 4, mode: 'points', win: 'low', target: '', how: 'Najmanje poena pobjeđuje' },
+    { name: 'Tablić', theme: 'felt', icon: 3, color: 2, mode: 'points', win: 'high', target: 101, how: 'Poeni, igra se do 101' },
+    { name: 'Belot', theme: 'cards', icon: 2, color: 1, mode: 'points', win: 'high', target: 1001, how: 'Poeni, igra se do 1001' },
+    { name: 'Jamb', theme: 'dice', icon: 4, color: 6, mode: 'points', win: 'high', target: '', how: 'Najviše poena pobjeđuje' },
+    { name: 'Na pobjede', theme: 'plain', icon: 4, color: 3, mode: 'wins', win: 'high', target: '', how: 'Samo +1 za pobjednika' }
   ];
 
   var ICON = {
@@ -495,6 +611,60 @@ p { margin: 0; }
     return parts.join(' · ');
   }
 
+  /* ---------- Themes ---------- */
+  var THEMES = [['plain', 'Obični'], ['cards', 'Karte'], ['felt', 'Zeleni sto'], ['colors', 'Četiri boje'], ['dice', 'Kocke']];
+  var QUAD = [['#E5322D', '#fff'], ['#F7C600', '#1B1502'], ['#2FA84F', '#fff'], ['#1F6FD6', '#fff']];
+  var CHIPS = ['#C8372D', '#2A5DB8', '#1C1C1C', '#7A3FB8', '#D07A12', '#0E8A8A'];
+  var PIPS = { 1: [[20, 20]], 2: [[11, 11], [29, 29]], 3: [[11, 11], [20, 20], [29, 29]], 4: [[11, 11], [29, 11], [11, 29], [29, 29]],
+    5: [[11, 11], [29, 11], [20, 20], [11, 29], [29, 29]], 6: [[11, 11], [29, 11], [11, 20], [29, 20], [11, 29], [29, 29]] };
+
+  function inferTheme(name) {
+    var n = String(name || '').toLowerCase();
+    if (/\buno\b/.test(n)) return 'colors';
+    if (/remi|belot|poker|briškul|briskul|trešet|preferans|raub|šnops|karte/.test(n)) return 'cards';
+    if (/tabli/.test(n)) return 'felt';
+    if (/jamb|kock|yams/.test(n)) return 'dice';
+    return 'plain';
+  }
+  function themeOf(g) { return g.theme || inferTheme(g.name); }
+  function die(n) {
+    return '<svg viewBox="0 0 40 40"><rect x="1.5" y="1.5" width="37" height="37" rx="8" fill="#fff" stroke="#13203B" stroke-width="2"/>' +
+      PIPS[n].map(function (p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.6" fill="#13203B"/>'; }).join('') + '</svg>';
+  }
+  /* A player's marker drawn in the game's own vocabulary: a colour card, a playing card, a chip or a die. */
+  function avatar(theme, i, name, sm) {
+    var cls = 'avatar' + (sm ? ' sm' : '');
+    if (theme === 'colors') {
+      var q = QUAD[i % 4];
+      return '<span class="' + cls + ' av-colors" style="--c:' + q[0] + ';--ct:' + q[1] + '" aria-hidden="true">' + initial(name) + '</span>';
+    }
+    if (theme === 'cards') {
+      return '<span class="' + cls + ' av-card' + (i % 2 ? ' red' : '') + '" aria-hidden="true">' + initial(name) + '<i>' + ICONS[i % 4] + '︎</i></span>';
+    }
+    if (theme === 'felt') return '<span class="' + cls + ' av-chip" style="--c:' + CHIPS[i % CHIPS.length] + '" aria-hidden="true">' + initial(name) + '</span>';
+    if (theme === 'dice') return '<span class="' + cls + ' av-die" aria-hidden="true">' + die(i % 6 + 1) + '</span>';
+    return '<span class="' + cls + '" style="--c:' + color(i) + '" aria-hidden="true">' + initial(name) + '</span>';
+  }
+  function ghead(g, theme) {
+    var text = '<h1>' + esc(g.name) + '</h1><p>' + esc(rules(g)) + '</p>';
+    if (theme === 'colors') {
+      return '<div class="ghead gh-colors">' + text + '<div class="deck" aria-hidden="true">' +
+        ['7', '+2', '0', '5'].map(function (v, i) { return '<span style="--c:' + QUAD[i][0] + ';--ct:' + QUAD[i][1] + '">' + v + '</span>'; }).join('') + '</div></div>';
+    }
+    if (theme === 'cards') {
+      var c = initial(g.name) + '<small>' + suit(g.icon) + '</small>';
+      return '<div class="ghead gh-cards"><span class="corner tl" aria-hidden="true">' + c + '</span><span class="corner br" aria-hidden="true">' + c + '</span>' + text +
+        '<div class="suitrow" aria-hidden="true"><span>♠︎</span><b>♥︎</b><span>♣︎</span><b>♦︎</b></div></div>';
+    }
+    if (theme === 'felt') {
+      return '<div class="ghead gh-felt">' + text + '<div class="hand" aria-hidden="true"><span>♣︎</span><span class="red">♦︎</span><span>♠︎</span></div></div>';
+    }
+    if (theme === 'dice') {
+      return '<div class="ghead gh-dice">' + text + '<div class="dice-row" aria-hidden="true">' + [5, 3, 6, 1, 4].map(die).join('') + '</div></div>';
+    }
+    return '<div class="ghead" style="--c:' + color(g.color) + '"><span class="wm suit" aria-hidden="true">' + suit(g.icon) + '</span>' + text + '</div>';
+  }
+
   /* ---------- Landing ---------- */
   function renderLanding() {
     var h = '<header class="hero"><div class="gutter">' +
@@ -562,7 +732,7 @@ p { margin: 0; }
       var status = st.winners.length ? 'Pobjednik: ' + names(st.winners)
         : st.leaders.length ? 'Vodi ' + names(st.leaders) + ' · ' + fmt(st.totals[st.leaders[0].id])
         : st.played ? 'Izjednačeno' : 'Još nema rezultata';
-      h += '<button class="gcard" style="--c:' + color(g.color) + '" data-action="open-game" data-id="' + g.id + '">' +
+      h += '<button class="gcard gc-' + themeOf(g) + '" style="--c:' + color(g.color) + '" data-action="open-game" data-id="' + g.id + '">' +
         '<span class="wm suit" aria-hidden="true">' + suit(g.icon) + '</span>' +
         '<span class="gcard-top"><span class="gcard-ic suit" aria-hidden="true">' + suit(g.icon) + '</span>' + (g.example ? '<span class="badge">Primjer</span>' : '') + '</span>' +
         '<span class="gcard-name">' + esc(g.name) + '</span>' +
@@ -579,10 +749,10 @@ p { margin: 0; }
   function renderGame(g) {
     var st = standing(g);
     var wins = g.mode === 'wins';
+    var theme = themeOf(g);
     var h = '<div class="wrap"><div class="nav"><button class="nav-btn" data-action="home">' + ICON.back + ' Igre</button>' +
       '<button class="nav-btn" data-action="edit-game">Uredi</button></div>' +
-      '<div class="ghead" style="--c:' + color(g.color) + '"><span class="wm suit" aria-hidden="true">' + suit(g.icon) + '</span>' +
-      '<h1>' + esc(g.name) + '</h1><p>' + esc(rules(g)) + '</p></div>';
+      ghead(g, theme);
 
     if (st.winners.length) {
       h += '<div class="banner"><span class="banner-crown">' + ICON.crown + '</span><div style="min-width:0">' +
@@ -595,11 +765,11 @@ p { margin: 0; }
       var tot = st.totals[p.id];
       var first = st.leaders.length > 0 && st.rank[p.id] === 1;
       h += '<div class="row' + (first ? ' leader' : '') + '"><span class="rank' + (first ? ' first' : '') + '">' + (st.played ? st.rank[p.id] : '–') + '</span>' +
-        '<span class="avatar" style="--c:' + color(i) + '" aria-hidden="true">' + initial(p.name) + '</span>' +
+        avatar(theme, i, p.name) +
         '<span class="row-main"><span class="row-title" style="display:block">' + esc(p.name) + '</span>';
       if (g.target) {
         var pct = Math.max(0, Math.min(100, tot / g.target * 100));
-        h += '<span class="progress" style="display:block;--c:' + color(g.color) + '"><i style="width:' + pct + '%"></i></span>';
+        h += '<span class="progress" style="display:block;--c:' + (theme === 'colors' ? QUAD[i % 4][0] : theme === 'plain' ? color(g.color) : 'var(--accent)') + '"><i style="width:' + pct + '%"></i></span>';
       }
       h += '</span><span class="total">' + fmt(tot) + '</span>';
       if (wins) h += '<button class="plus-one" data-action="add-win" data-pid="' + p.id + '" aria-label="Pobjeda za ' + esc(p.name) + '">+1</button>';
@@ -631,6 +801,7 @@ p { margin: 0; }
     var g = view.page === 'game' ? game(view.gameId) : null;
     if (view.page === 'game' && !g) view = { page: 'home', gameId: null };
     document.body.classList.toggle('on-landing', view.page === 'landing');
+    THEMES.forEach(function (t) { document.body.classList.toggle('t-' + t[0], !!g && t[0] !== 'plain' && themeOf(g) === t[0]); });
     document.getElementById('app').innerHTML = view.page === 'landing' ? renderLanding() : g ? renderGame(g) : renderHome();
   }
 
@@ -661,6 +832,11 @@ p { margin: 0; }
       '<div class="swatches" style="padding-top:0">' + ICONS.map(function (ic, i) {
         return '<button type="button" class="swatch icon" data-action="set-icon" data-v="' + i + '" aria-pressed="' + (i === d.icon) + '" aria-label="Znak ' + (i + 1) + '">' + suit(i) + '</button>';
       }).join('') + '</div></div>';
+
+    var cur = d.theme || inferTheme(d.name);
+    h += '<div class="section-label">Stil igre</div><div class="tpl pick-theme">' + THEMES.map(function (t) {
+      return '<button type="button" data-action="set-theme" data-v="' + t[0] + '" aria-pressed="' + (t[0] === cur) + '">' + t[1] + '</button>';
+    }).join('') + '</div>';
 
     h += '<div class="section-label">Brojanje</div>' + seg('set-mode', d.mode, [['points', 'Poeni'], ['wins', 'Pobjede']]);
     if (d.mode === 'points') {
@@ -706,13 +882,14 @@ p { margin: 0; }
 
   function renderRoundForm(d) {
     var g = game(d.gameId);
+    var theme = themeOf(g);
     var h = '<form class="sheet" id="round-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" novalidate>' +
       '<div class="sheet-bar"><button type="button" class="nav-btn" data-action="close-sheet">Odustani</button>' +
       '<h2 id="sheet-title">Runda ' + (g.rounds.length + 1) + '</h2>' +
       '<button type="submit" class="nav-btn">Sačuvaj</button></div>' +
       '<div class="group">';
     g.players.forEach(function (p, i) {
-      h += '<div class="field"><span class="avatar sm" style="--c:' + color(i) + '" aria-hidden="true">' + initial(p.name) + '</span>' +
+      h += '<div class="field">' + avatar(theme, i, p.name || '?', true) +
         '<label class="who" for="r-' + p.id + '">' + esc(p.name) + '</label>' +
         '<button type="button" class="sign" data-action="flip-sign" data-pid="' + p.id + '" aria-label="Promijeni predznak za ' + esc(p.name) + '">±</button>' +
         '<input class="pts" id="r-' + p.id + '" data-pid="' + p.id + '" type="text" inputmode="numeric" maxlength="7" autocomplete="off" placeholder="0" value="' + esc(d.values[p.id] || '') + '"></div>';
@@ -789,10 +966,10 @@ p { margin: 0; }
   /* ---------- Actions ---------- */
   function blankPlayers() { return [{ id: uid(), name: '' }, { id: uid(), name: '' }]; }
   function newDraft() {
-    return { type: 'game', id: null, name: '', icon: 0, color: 3, mode: 'points', win: 'high', target: '', players: blankPlayers(), error: '' };
+    return { type: 'game', id: null, theme: null, name: '', icon: 0, color: 3, mode: 'points', win: 'high', target: '', players: blankPlayers(), error: '' };
   }
   function applyTemplate(d, t) {
-    d.name = t.name; d.icon = t.icon; d.color = t.color; d.mode = t.mode; d.win = t.win; d.target = t.target ? String(t.target) : '';
+    d.name = t.name; d.theme = t.theme; d.icon = t.icon; d.color = t.color; d.mode = t.mode; d.win = t.win; d.target = t.target ? String(t.target) : '';
   }
 
   function saveGame() {
@@ -812,10 +989,10 @@ p { margin: 0; }
       });
       g.rounds = g.rounds.filter(function (r) { return Object.keys(r.scores).length; });
       if (g.mode !== d.mode) g.rounds = [];
-      g.name = name; g.icon = d.icon; g.color = d.color; g.mode = d.mode; g.win = d.win; g.target = target; g.players = list;
+      g.name = name; g.theme = d.theme || inferTheme(name); g.icon = d.icon; g.color = d.color; g.mode = d.mode; g.win = d.win; g.target = target; g.players = list;
       delete g.example;
     } else {
-      g = { id: uid(), name: name, icon: d.icon, color: d.color, mode: d.mode, win: d.win, target: target, players: list, rounds: [] };
+      g = { id: uid(), name: name, theme: d.theme || inferTheme(name), icon: d.icon, color: d.color, mode: d.mode, win: d.win, target: target, players: list, rounds: [] };
       state.games.unshift(g);
       view = { page: 'game', gameId: g.id };
     }
@@ -865,7 +1042,7 @@ p { margin: 0; }
     'edit-game': function () {
       var g = game(view.gameId);
       sheet = {
-        type: 'game', id: g.id, name: g.name, icon: g.icon, color: g.color, mode: g.mode, win: g.win, target: g.target ? String(g.target) : '',
+        type: 'game', id: g.id, theme: themeOf(g), name: g.name, icon: g.icon, color: g.color, mode: g.mode, win: g.win, target: g.target ? String(g.target) : '',
         players: g.players.map(function (p) { return { id: p.id, name: p.name }; }), error: ''
       };
       renderSheet();
@@ -875,6 +1052,7 @@ p { margin: 0; }
       applyTemplate(sheet, TEMPLATES[+el.dataset.i]);
       renderSheet(sheet.players[0] ? 'f-p-' + sheet.players[0].id : null);
     },
+    'set-theme': function (el) { syncDraft(); sheet.theme = el.dataset.v; renderSheet(); },
     'set-color': function (el) { syncDraft(); sheet.color = +el.dataset.v; renderSheet(); },
     'set-icon': function (el) { syncDraft(); sheet.icon = +el.dataset.v; renderSheet(); },
     'set-mode': function (el) { syncDraft(); sheet.mode = el.dataset.v; renderSheet(); },
