@@ -309,6 +309,22 @@ p { margin: 0; }
 .del:hover { background: var(--fill); color: var(--ink2); }
 .del svg { width: 12px; height: 12px; }
 
+/* Statistics, live table */
+.stat-num { flex: none; text-align: right; font-family: var(--display); font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; line-height: 1; }
+.stat-num small { display: block; font-family: var(--body); font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--ink2); margin-top: 3px; }
+body.t-cards .stat-num { font-weight: 400; }
+.row-sub { display: block; font-size: 14px; color: var(--ink2); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.banner .mini, .mini-btn { flex: none; background: var(--accent); color: var(--on-accent); border-radius: 18px; padding: 8px 14px; font-weight: 700; font-size: 15px; }
+.live { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; background: var(--fill); border-radius: 16px; padding: 6px 12px; font-variant-numeric: tabular-nums; }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: #E5322D; animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+.waiting { text-align: center; padding: 72px 16px; color: var(--ink2); }
+.waiting strong { display: block; font-family: var(--display); font-size: 26px; letter-spacing: -.02em; color: var(--ink); margin-bottom: 8px; }
+.big-code { text-align: center; font-family: var(--display); font-weight: 800; font-size: 54px; letter-spacing: .12em; line-height: 1; margin: 10px 0 6px; padding-left: .12em; }
+.link-box { display: block; width: 100%; background: var(--field); border-radius: 14px; padding: 13px 14px; font-size: 14px; text-align: center; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all; margin-top: 14px; }
+.link-btn { display: block; margin: 18px auto 0; color: var(--accent); font-weight: 600; font-size: 15px; text-decoration: underline; text-underline-offset: 4px; }
+.code-input { text-transform: uppercase; text-align: center; font-family: var(--display); font-weight: 800; font-size: 30px; letter-spacing: .14em; }
+
 /* Install prompt */
 .install { display: flex; gap: 12px; align-items: center; margin-top: 18px; padding: 14px 12px 14px 16px; background: var(--surface); border-radius: var(--r-card); box-shadow: var(--shadow); }
 .install-text { flex: 1; min-width: 0; font-size: 14.5px; color: var(--ink2); }
@@ -581,7 +597,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     } catch (e) { /* fall through to the example */ }
     return seed();
   }
-  function save() { write(KEY, JSON.stringify(state)); }
+  function save() { write(KEY, JSON.stringify(state)); schedulePush(); }
 
   var state = load();
   var view = { page: read(SEEN) ? 'home' : 'landing', gameId: null };
@@ -722,8 +738,12 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     var i = dealerIndex(g);
     return i >= 0 ? '<p class="deal-line">Dijeli <b>' + esc(g.players[i].name) + '</b></p>' : '';
   }
-  function dealerBar(g) {
+  function dealerBar(g, ro) {
     var i = dealerIndex(g);
+    if (ro) {
+      return i < 0 ? '' : '<div class="dealer-bar"><span class="dealer-ic">' + DEAL_ICON + '</span>' +
+        '<span class="dealer-text"><small>Sada dijeli</small><b>' + esc(g.players[i].name) + '</b></span></div>';
+    }
     if (i < 0) {
       return '<button class="dealer-bar" data-action="ask-dealer"><span class="dealer-ic">' + DEAL_ICON + '</span>' +
         '<span class="dealer-text"><b>Ko prvi dijeli?</b><small>Poslije ide redom, automatski</small></span><span class="go">Izaberi</span></button>';
@@ -775,6 +795,121 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     return '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">' +
       '<div class="sheet-bar"><span></span><h2 id="sheet-title">' + esc(d.title) + '</h2><span></span></div>' + d.html +
       '<button class="btn" data-action="close-sheet" style="margin-top:22px">U redu</button></div>';
+  }
+
+  /* ---------- Statistics: every finished game is kept in g.history ---------- */
+  function plural(n, one, few, many) {
+    var m = n % 10, c = n % 100;
+    return n + ' ' + (m === 1 && c !== 11 ? one : m >= 2 && m <= 4 && !(c >= 12 && c <= 14) ? few : many);
+  }
+  function partije(n) { return plural(n, 'partija', 'partije', 'partija'); }
+  function dateText(t) { var d = new Date(t); return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '.'; }
+  function statsBlock(g, theme) {
+    var hist = g.history || [];
+    if (!hist.length) return '';
+    var wins = g.mode === 'wins';
+    var rows = g.players.map(function (p, i) {
+      var played = hist.filter(function (x) { return p.id in x.totals; });
+      var won = hist.filter(function (x) { return x.winners.indexOf(p.id) !== -1; }).length;
+      var sum = played.reduce(function (a, x) { return a + x.totals[p.id]; }, 0);
+      return { p: p, i: i, played: played.length, won: won, avg: played.length ? Math.round(sum / played.length) : 0 };
+    }).sort(function (a, b) { return b.won - a.won; });
+    var h = '<div class="section-label">Statistika · ' + partije(hist.length) + '</div><div class="group">';
+    rows.forEach(function (r) {
+      h += '<div class="row">' + avatar(theme, r.i, r.p.name) + '<span class="row-main"><span class="row-title" style="display:block">' + esc(r.p.name) + '</span>' +
+        '<span class="row-sub">Odigrano ' + r.played + (wins || !r.played ? '' : ' · prosjek ' + fmt(r.avg)) + '</span></span>' +
+        '<span class="stat-num">' + r.won + '<small>' + plural(r.won, 'pobjeda', 'pobjede', 'pobjeda').replace(/^\d+ /, '') + '</small></span></div>';
+    });
+    h += '</div><div class="section-label">Zadnje partije</div><div class="group">';
+    hist.slice(-5).reverse().forEach(function (x) {
+      var who = x.winners.map(function (id) { return x.names[id]; }).filter(Boolean).join(' i ');
+      var chips = Object.keys(x.totals).sort(function (a, b) { return lowWins(g) ? x.totals[a] - x.totals[b] : x.totals[b] - x.totals[a]; }).map(function (id) {
+        return '<span class="chip">' + esc(x.names[id] || '?') + ' <b>' + fmt(x.totals[id]) + '</b></span>';
+      }).join('');
+      h += '<div class="row hist"><div class="row-main"><div class="hist-title">' + dateText(x.t) + ' · ' + (who ? 'pobjeda: ' + esc(who) : 'neriješeno') + '</div>' +
+        '<div class="chips">' + chips + '</div></div></div>';
+    });
+    return h + '</div>';
+  }
+
+  /* ---------- Live table: the host publishes a game under a short code, others watch it ---------- */
+  var API = 'api/table';
+  var shareOK = false;
+  var pushed = {};
+  var pushTimer = null;
+  var watchTimer = null;
+  var watchSeen = '';
+
+  function api(body, cb) {
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (cb) cb(r.ok ? 0 : r.status, j); }); })
+      .catch(function () { if (cb) cb(-1, {}); });
+  }
+  function publicGame(g) {
+    return { name: g.name, theme: themeOf(g), icon: g.icon, color: g.color, mode: g.mode, win: g.win, target: g.target, dealer: g.dealer,
+      players: g.players, rounds: g.rounds, history: (g.history || []).slice(-20) };
+  }
+  function schedulePush() {
+    if (!shareOK) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(function () {
+      state.games.forEach(function (g) {
+        if (!g.share) return;
+        var body = JSON.stringify(publicGame(g));
+        if (pushed[g.share.code] === body) return;
+        var code = g.share.code;
+        api({ action: 'update', code: code, key: g.share.key, game: publicGame(g) }, function (err) {
+          if (!err) pushed[code] = body;
+          else if (err === 404 || err === 403) { delete g.share; write(KEY, JSON.stringify(state)); if (!sheet) render(); }
+        });
+      });
+    }, 500);
+  }
+  function shareLink(code) { return location.origin + location.pathname + '?sto=' + code; }
+  function renderShareSheet(d) {
+    var g = game(d.gameId);
+    var link = shareLink(g.share.code);
+    return '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">' +
+      '<div class="sheet-bar"><span></span><h2 id="sheet-title">Sto se dijeli uživo</h2><button type="button" class="nav-btn" data-action="close-sheet">Gotovo</button></div>' +
+      '<p class="confirm-text">Ostali otvore link ili upišu kod i gledaju rezultat na svom telefonu. Upisuješ samo ti.</p>' +
+      '<div class="big-code" id="share-code">' + esc(g.share.code) + '</div>' +
+      '<span class="link-box" id="share-link">' + esc(link) + '</span>' +
+      '<button class="btn" data-action="copy-link">Kopiraj link</button>' +
+      (navigator.share ? '<button class="btn gray" data-action="send-link" style="margin-top:10px">Pošalji</button>' : '') +
+      '<button class="btn danger-text" data-action="stop-share" style="margin-top:6px">Prekini dijeljenje</button></div>';
+  }
+  function renderJoinSheet(d) {
+    return '<form class="sheet" id="join-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" novalidate>' +
+      '<div class="sheet-bar"><button type="button" class="nav-btn" data-action="close-sheet">Odustani</button><h2 id="sheet-title">Gledaj sto</h2><span></span></div>' +
+      '<p class="confirm-text" style="margin-bottom:14px">Upiši kod koji ti je dao domaćin.</p>' +
+      '<div class="group"><div class="field"><input id="join-code" class="code-input" type="text" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="KOD" aria-label="Kod stola"></div></div>' +
+      (d.error ? '<p class="error" role="alert">' + esc(d.error) + '</p>' : '') +
+      '<button type="submit" class="btn">Gledaj</button></form>';
+  }
+  function cleanCode(v) { return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8); }
+  function startWatch(code) {
+    view = { page: 'watch', code: code, game: null, error: false };
+    watchSeen = '';
+    try { history.replaceState(null, '', location.pathname + '?sto=' + code); } catch (e) { /* not allowed here */ }
+    render(); window.scrollTo(0, 0);
+    pollWatch();
+  }
+  function pollWatch() {
+    clearTimeout(watchTimer);
+    if (view.page !== 'watch') return;
+    var code = view.code;
+    var again = function () { if (view.page === 'watch' && view.code === code && !view.error) watchTimer = setTimeout(pollWatch, 3000); };
+    if (document.hidden) return again();
+    fetch(API + '?code=' + encodeURIComponent(code)).then(function (r) {
+      if (r.status === 404 || r.status === 400) { if (view.page === 'watch') { view.error = true; view.game = null; render(); } return null; }
+      return r.ok ? r.json() : null;
+    }).then(function (j) {
+      if (j && j.game && view.page === 'watch' && view.code === code) {
+        var txt = JSON.stringify(j.game);
+        if (txt !== watchSeen) { watchSeen = txt; view.game = j.game; render(); }
+      }
+      again();
+    }).catch(again);
   }
 
   /* ---------- Landing ---------- */
@@ -848,10 +983,11 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
         '<span class="wm suit" aria-hidden="true">' + suit(g.icon) + '</span>' +
         '<span class="gcard-top"><span class="gcard-ic suit" aria-hidden="true">' + suit(g.icon) + '</span>' + (g.example ? '<span class="badge">Primjer</span>' : '') + '</span>' +
         '<span class="gcard-name">' + esc(g.name) + '</span>' +
-        '<span class="gcard-meta">' + players(g.players.length) + '</span>' +
+        '<span class="gcard-meta">' + players(g.players.length) + ((g.history || []).length ? ' \u00b7 ' + partije(g.history.length) : '') + '</span>' +
         '<span class="gcard-status">' + esc(status) + '</span></button>';
     });
     h += '<button class="gcard new" data-action="new-game"><span class="plus">' + ICON.plus + '</span>Nova igra</button></div>';
+    if (shareOK) h += '<button class="link-btn" data-action="ask-join">Ima\u0161 kod? Gledaj sto u\u017eivo</button>';
     h += installCard();
     if (state.games.some(function (g) { return g.example; })) {
       h += '<p class="footnote">Igra s oznakom Primjer ima izmišljene igrače. Uredi je ili obriši kad dodaš svoju.</p>';
@@ -859,22 +995,24 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     return h + '</div>';
   }
 
-  function renderGame(g) {
+  function renderGame(g, ro) {
     var st = standing(g);
     var wins = g.mode === 'wins';
     var theme = themeOf(g);
-    var h = '<div class="wrap"><div class="nav"><button class="nav-btn" data-action="home">' + ICON.back + ' Igre</button>' +
-      '<button class="nav-btn" data-action="edit-game">Uredi</button></div>' +
-      ghead(g, theme);
+    var h = '<div class="wrap"><div class="nav">' +
+      (ro ? '<button class="nav-btn" data-action="leave-watch">' + ICON.back + ' Izađi</button><span class="live"><i></i>Uživo · ' + esc(view.code) + '</span>'
+          : '<button class="nav-btn" data-action="home">' + ICON.back + ' Igre</button><button class="nav-btn" data-action="edit-game">Uredi</button>') +
+      '</div>' + ghead(g, theme);
 
     if (st.winners.length) {
-      h += '<div class="banner"><span class="banner-crown">' + ICON.crown + '</span><div style="min-width:0">' +
+      h += '<div class="banner"><span class="banner-crown">' + ICON.crown + '</span><div style="flex:1;min-width:0">' +
         '<div class="banner-title">' + esc(names(st.winners)) + (st.winners.length > 1 ? ' dijele pobjedu' : ' pobjeđuje') + '</div>' +
-        '<div class="banner-sub">' + fmt(st.totals[st.winners[0].id]) + (wins ? ' pobjeda' : ' poena') + '. Za novu partiju obriši rezultate ispod.</div></div></div>';
+        '<div class="banner-sub">' + fmt(st.totals[st.winners[0].id]) + (wins ? ' pobjeda' : ' poena') + '</div></div>' +
+        (ro ? '' : '<button class="mini" data-action="finish">Nova partija</button>') + '</div>';
     }
 
     var di = dealerIndex(g);
-    h += dealerBar(g);
+    h += dealerBar(g, ro);
     h += '<div class="group">';
     g.players.forEach(function (p, i) {
       var tot = st.totals[p.id];
@@ -887,13 +1025,19 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
         h += '<span class="progress" style="display:block;--c:' + (theme === 'colors' ? QUAD[i % 4][0] : theme === 'plain' ? color(g.color) : 'var(--accent)') + '"><i style="width:' + pct + '%"></i></span>';
       }
       h += '</span><span class="total">' + fmt(tot) + '</span>';
-      if (wins) h += '<button class="plus-one" data-action="add-win" data-pid="' + p.id + '" aria-label="Pobjeda za ' + esc(p.name) + '">+1</button>';
+      if (wins && !ro) h += '<button class="plus-one" data-action="add-win" data-pid="' + p.id + '" aria-label="Pobjeda za ' + esc(p.name) + '">+1</button>';
       h += '</div>';
     });
     h += '</div>';
 
-    if (!wins) h += '<button class="btn" data-action="new-round">' + ICON.plus + ' Upiši rundu</button>';
-    else h += '<p class="footnote">Dodirni +1 kod igrača koji je dobio partiju.</p>';
+    if (!ro) {
+      if (!wins) h += '<button class="btn" data-action="new-round">' + ICON.plus + ' Upiši rundu</button>';
+      else h += '<p class="footnote">Dodirni +1 kod igrača koji je dobio partiju.</p>';
+      if (shareOK) {
+        h += '<button class="btn gray" data-action="share" style="margin-top:10px">' +
+          (g.share ? '<span class="live" style="background:none;padding:0"><i></i></span> Sto se dijeli · ' + esc(g.share.code) : 'Podijeli sto uživo') + '</button>';
+      }
+    }
 
     if (g.rounds.length) {
       h += '<div class="section-label">' + (wins ? 'Partije' : 'Runde') + '</div><div class="group">';
@@ -905,19 +1049,34 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
         }).join('');
         h += '<div class="row hist"><div class="row-main"><div class="hist-title">' + (wins ? 'Partija ' : 'Runda ') + (i + 1) + (wins ? ' · pobjeda' : '') + dealtBy(g, r) + '</div>' +
           '<div class="chips">' + chips + '</div></div>' +
-          '<button class="del" data-action="del-round" data-rid="' + r.id + '" aria-label="Obriši ' + (wins ? 'partiju ' : 'rundu ') + (i + 1) + '">' + ICON.x + '</button></div>';
+          (ro ? '' : '<button class="del" data-action="del-round" data-rid="' + r.id + '" aria-label="Obriši ' + (wins ? 'partiju ' : 'rundu ') + (i + 1) + '">' + ICON.x + '</button>') + '</div>';
       }
-      h += '</div><button class="btn danger-text" data-action="ask-reset">Obriši rezultate i počni ispočetka</button>';
+      h += '</div>';
+      if (!ro) {
+        h += '<button class="btn gray" data-action="finish">Završi partiju i počni novu</button>' +
+          '<button class="btn danger-text" data-action="ask-reset" style="margin-top:4px">Odbaci rezultate bez čuvanja</button>';
+      }
     }
-    return h + '</div>';
+    return h + statsBlock(g, theme) + '</div>';
+  }
+
+  function renderWatchWait() {
+    return '<div class="wrap"><div class="nav"><button class="nav-btn" data-action="leave-watch">' + ICON.back + ' Izađi</button><span></span></div>' +
+      '<div class="waiting"><strong>' + (view.error ? 'Sto nije pronađen' : 'Tražim sto ' + esc(view.code)) + '</strong>' +
+      (view.error ? 'Provjeri kod ili pitaj domaćina da ponovo podijeli sto.' : 'Samo trenutak.') + '</div></div>';
   }
 
   function render() {
     var g = view.page === 'game' ? game(view.gameId) : null;
     if (view.page === 'game' && !g) view = { page: 'home', gameId: null };
+    var shown = view.page === 'watch' ? view.game : g;
     document.body.classList.toggle('on-landing', view.page === 'landing');
-    THEMES.forEach(function (t) { document.body.classList.toggle('t-' + t[0], !!g && t[0] !== 'plain' && themeOf(g) === t[0]); });
-    document.getElementById('app').innerHTML = view.page === 'landing' ? renderLanding() : g ? renderGame(g) : renderHome();
+    THEMES.forEach(function (t) { document.body.classList.toggle('t-' + t[0], !!shown && t[0] !== 'plain' && themeOf(shown) === t[0]); });
+    var html;
+    if (view.page === 'landing') html = renderLanding();
+    else if (view.page === 'watch') html = view.game ? renderGame(view.game, true) : renderWatchWait();
+    else html = g ? renderGame(g) : renderHome();
+    document.getElementById('app').innerHTML = html;
   }
 
   /* ---------- Sheets ---------- */
@@ -1027,7 +1186,7 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     document.documentElement.classList.toggle('locked', !!sheet);
     if (!sheet) { root.innerHTML = ''; return; }
     var scroll = root.querySelector('.sheet') ? root.querySelector('.sheet').scrollTop : 0;
-    var inner = sheet.type === 'game' ? renderGameForm(sheet) : sheet.type === 'round' ? renderRoundForm(sheet) : sheet.type === 'dealer' ? renderDealerSheet(sheet) : sheet.type === 'info' ? renderInfo(sheet) : renderConfirm(sheet);
+    var inner = sheet.type === 'game' ? renderGameForm(sheet) : sheet.type === 'round' ? renderRoundForm(sheet) : sheet.type === 'dealer' ? renderDealerSheet(sheet) : sheet.type === 'info' ? renderInfo(sheet) : sheet.type === 'share' ? renderShareSheet(sheet) : sheet.type === 'join' ? renderJoinSheet(sheet) : renderConfirm(sheet);
     var fresh = !root.firstChild;
     root.innerHTML = '<div class="backdrop" data-backdrop>' + inner + '</div>';
     if (!fresh) {
@@ -1220,6 +1379,60 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
       renderSheet();
     },
     'hide-install': function () { write(HIDE_INSTALL, '1'); render(); },
+    'finish': function () {
+      /* Close the current game into the statistics and start a fresh one; the deal carries on from where it stopped. */
+      var g = game(view.gameId);
+      if (!g.rounds.length) return;
+      var st = standing(g);
+      var entry = { id: uid(), t: Date.now(), n: g.rounds.length, totals: st.totals, names: {}, winners: st.leaders.map(function (p) { return p.id; }) };
+      g.players.forEach(function (p) { entry.names[p.id] = p.name; });
+      var undo = { type: 'unfinish', gameId: g.id, rounds: g.rounds, entryId: entry.id, dealer: g.dealer };
+      var di = dealerIndex(g);
+      if (di >= 0) g.dealer = g.players[di].id;
+      g.history = (g.history || []).concat([entry]);
+      g.rounds = []; delete g.example;
+      save(); render(); window.scrollTo(0, 0);
+      showToast('Partija sačuvana u statistiku', undo);
+    },
+    'share': function () {
+      var g = game(view.gameId);
+      if (g.share) { sheet = { type: 'share', gameId: g.id }; return renderSheet(); }
+      api({ action: 'create', game: publicGame(g) }, function (err, j) {
+        if (err || !j.code) return showToast('Dijeljenje trenutno ne radi. Pokušaj ponovo.');
+        g.share = { code: j.code, key: j.key };
+        pushed[j.code] = JSON.stringify(publicGame(g));
+        save(); render();
+        sheet = { type: 'share', gameId: g.id }; renderSheet();
+      });
+    },
+    'copy-link': function () {
+      var link = document.getElementById('share-link').textContent;
+      var done = function () { showToast('Link kopiran'); };
+      var pick = function () {
+        var range = document.createRange(); range.selectNodeContents(document.getElementById('share-link'));
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        showToast('Link je označen, kopiraj ga ručno');
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done, pick); else pick();
+    },
+    'send-link': function () {
+      var g = game(sheet.gameId);
+      navigator.share({ title: g.name, text: 'Prati rezultat uživo: ' + g.name, url: shareLink(g.share.code) }).catch(function () {});
+    },
+    'stop-share': function () {
+      var g = game(sheet.gameId);
+      if (g.share) api({ action: 'delete', code: g.share.code, key: g.share.key });
+      delete g.share;
+      save(); sheet = null; renderSheet(); render();
+      showToast('Dijeljenje prekinuto');
+    },
+    'ask-join': function () { sheet = { type: 'join', error: '' }; renderSheet('join-code'); },
+    'leave-watch': function () {
+      clearTimeout(watchTimer);
+      try { history.replaceState(null, '', location.pathname); } catch (e) { /* not allowed here */ }
+      view = { page: read(SEEN) ? 'home' : 'landing', gameId: null };
+      render(); window.scrollTo(0, 0);
+    },
     'close-sheet': function () { sheet = null; renderSheet(); },
     'new-round': function () {
       var g = game(view.gameId);
@@ -1256,6 +1469,11 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
       if (u.type === 'remove') removeRound(g, u.roundId);
       else if (u.type === 'restore') g.rounds.splice(Math.min(u.index, g.rounds.length), 0, u.round);
       else if (u.type === 'rounds') g.rounds = u.rounds;
+      else if (u.type === 'unfinish') {
+        g.rounds = u.rounds;
+        g.history = (g.history || []).filter(function (x) { return x.id !== u.entryId; });
+        if (u.dealer) g.dealer = u.dealer;
+      }
       save(); render();
     },
     'ask-reset': function () {
@@ -1278,6 +1496,8 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     'back-to-edit': function () { sheet = sheet.draft; renderSheet(); },
     'delete-game': function () {
       var id = sheet.draft.id;
+      var gone = game(id);
+      if (gone && gone.share) api({ action: 'delete', code: gone.share.code, key: gone.share.key });
       state.games = state.games.filter(function (g) { return g.id !== id; });
       save(); sheet = null; view = { page: 'home', gameId: null };
       renderSheet(); render();
@@ -1296,6 +1516,11 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
     e.preventDefault();
     if (e.target.id === 'game-form') saveGame();
     else if (e.target.id === 'round-form') saveRound();
+    else if (e.target.id === 'join-form') {
+      var code = cleanCode(document.getElementById('join-code').value);
+      if (code.length < 4) { sheet.error = 'Kod ima najmanje 4 znaka.'; return renderSheet('join-code'); }
+      sheet = null; renderSheet(); startWatch(code);
+    }
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && sheet) { actions[sheet.back || 'close-sheet'](); return; }
@@ -1310,5 +1535,15 @@ body.t-cards .rank, body.t-cards .plus-one { font-family: var(--body); }
   });
 
   render(); renderSheet(); renderToast();
+
+  /* Live tables exist only on the hosted site, and only once its storage is connected. */
+  if (window.__pwa) {
+    var wanted = cleanCode((/[?&]sto=([^&#]+)/.exec(location.search) || [])[1]);
+    if (wanted.length >= 4) startWatch(wanted);
+    fetch(API + '?ping=1').then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (j && j.ok) { shareOK = true; if (!sheet) render(); schedulePush(); }
+    }).catch(function () {});
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && view.page === 'watch') pollWatch(); });
+  }
 })();
 </script>

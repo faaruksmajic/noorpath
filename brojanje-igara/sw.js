@@ -1,5 +1,5 @@
 /* Offline support: the app shell is cached on install; pages load network-first so new versions arrive as soon as there is a connection. */
-const CACHE = 'brojanje-igara-v1';
+const CACHE = 'brojanje-igara-v2';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon.svg'];
 
 self.addEventListener('install', (e) => {
@@ -14,7 +14,7 @@ self.addEventListener('activate', (e) => {
 });
 self.addEventListener('fetch', (e) => {
   const req = e.request;
-  if (req.method !== 'GET') return;
+  if (req.method !== 'GET' || new URL(req.url).pathname.indexOf('/api/') !== -1) return;
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req)

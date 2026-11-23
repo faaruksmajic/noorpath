@@ -20,3 +20,15 @@ Statička stranica bez build koraka: Vercel servira `index.html` direktno (Frame
 ## Aplikacija na telefonu
 
 Stranica je PWA: `manifest.webmanifest`, ikone i `sw.js` omogućavaju instalaciju na početni ekran i rad bez interneta. Kod promjene naziva ili adrese ažuriraj `manifest.webmanifest` i konstantu `SITE` u `build.js`, pa pokreni `node build.js`.
+
+## Statistika
+
+„Završi partiju i počni novu“ sprema rezultat u statistiku igre (pobjede, prosjek, zadnje partije). Sve ostaje u pregledniku.
+
+## Zajednički sto uživo
+
+`api/table.js` je Vercel funkcija koja drži stanje podijeljenog stola pod kratkim kodom. Treba joj Redis s REST pristupom:
+u Vercel projektu otvori Storage → Create Database → Upstash for Redis i poveži ga s projektom. Vercel sam doda varijable
+`KV_REST_API_URL` i `KV_REST_API_TOKEN` (ili `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`); nakon toga uradi Redeploy.
+Dok spremište nije povezano, dugme „Podijeli sto uživo“ se ne prikazuje i sve ostalo radi normalno.
+Podijeljeni sto se briše sam tri dana nakon zadnje izmjene.
